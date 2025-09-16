@@ -48,6 +48,8 @@ if ($page == 'products') {
         $product_name = $_POST['product_name'];
         $category = $_POST['category'];
         $price = $_POST['price'];
+        $stock = (int)$_POST['stock'];
+    if ($stock < 0) $stock = 0;
 
         // Initialize image_path with NULL for new products or the current image for existing products
         $image_path = isset($_POST['current_image']) ? $_POST['current_image'] : NULL;
@@ -77,16 +79,20 @@ if ($page == 'products') {
 
             // Check if image_path is NULL and there's a current_image value
             if ($image_path === NULL && !isset($_POST['current_image'])) {
-                // If we're here, there's no new image and no current image
-                $sql = "UPDATE products SET Product_Name=?, Category=?, Price=? WHERE ID=?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssdi", $product_name, $category, $price, $product_id);
-            } else {
-                // Normal update with image
-                $sql = "UPDATE products SET Product_Name=?, Category=?, Price=?, Image=? WHERE ID=?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssdsi", $product_name, $category, $price, $image_path, $product_id);
-            }
+            $sql = "UPDATE products 
+            SET Product_Name=?, Category=?, Price=?, Stock=? 
+            WHERE ID=?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssdii", $product_name, $category, $price, $stock, $product_id);
+        } else {
+            $sql = "UPDATE products 
+            SET Product_Name=?, Category=?, Price=?, Stock=?, Image=? 
+            WHERE ID=?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssdisi", $product_name, $category, $price, $stock, $image_path, $product_id);
+
+        }
+
 
             if ($stmt->execute()) {
                 $message = "Product updated successfully";
@@ -95,10 +101,11 @@ if ($page == 'products') {
             }
         } else {
             // Add new product
-            $sql = "INSERT INTO products (Product_Name, Category, Price, Image) VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO products 
+            (Product_Name, Category, Price, Stock, Image) 
+            VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssds", $product_name, $category, $price, $image_path);
-
+            $stmt->bind_param("ssdis", $product_name, $category, $price, $stock, $image_path);
             if ($stmt->execute()) {
                 $message = "Product added successfully";
             } else {
@@ -443,6 +450,13 @@ if ($page == 'products') {
                                                    value="<?php echo $edit_product ? $edit_product['Price'] : ''; ?>" required>
                                         </div>
                                     </div>
+                                    <div class="mb-3">
+                                        <label for="stock" class="form-label">Stock / Quantity</label>
+                                        <input type="number" class="form-control" id="stock" name="stock"
+                                            min="0"
+                                            value="<?php echo $edit_product ? $edit_product['Stock'] : '0'; ?>" required>
+                                    </div>
+                                    
                                     
                                     <div class="mb-3">
                                         <label for="product_image" class="form-label">Product Image</label>
@@ -526,6 +540,7 @@ if ($page == 'products') {
                                                 <th>Product Name</th>
                                                 <th>Category</th>
                                                 <th>Price</th>
+                                                <th>Stock</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -543,6 +558,7 @@ if ($page == 'products') {
                                                         <td><?php echo $product['Product_Name']; ?></td>
                                                         <td><?php echo $product['Category']; ?></td>
                                                         <td>₱<?php echo number_format($product['Price'], 2); ?></td>
+                                                        <td><?php echo $product['Stock']; ?></td> 
                                                         <td class="action-buttons">
                                                             <a href="?page=products&edit=<?php echo $product['ID']; ?><?php echo !empty($search_category) ? '&search_category=' . urlencode($search_category) : ''; ?>" class="btn btn-sm btn-primary" title="Edit">
                                                                 <i class="fas fa-edit"></i>

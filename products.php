@@ -116,6 +116,7 @@ $conn->close();
                                 <h5 class="card-title"><?php echo htmlspecialchars($product['Product_Name']); ?></h5>
                                 <p class="card-text">Category: <?php echo htmlspecialchars($product['Category']); ?></p>
                                 <p class="card-text">Price: ₱<?php echo htmlspecialchars(number_format($product['Price'], 2)); ?></p>
+                                <p class="card-text">Stock: <?php echo htmlspecialchars($product['Stock']); ?></p>
                             </div>
                             
                         </div>

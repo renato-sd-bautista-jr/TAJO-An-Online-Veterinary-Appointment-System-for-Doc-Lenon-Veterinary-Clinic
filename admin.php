@@ -372,6 +372,9 @@ if ($page == 'products') {
         <a href="history1.php">
             <i class="fas fa-history"></i> Appointment History
         </a>
+        <a href="ordermanagement.php">
+            <i class="fas fa-box"></i> Order Management
+        </a>
         <a href="logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>

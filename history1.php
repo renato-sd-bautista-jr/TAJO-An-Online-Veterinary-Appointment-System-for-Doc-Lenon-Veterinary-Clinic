@@ -256,8 +256,7 @@ $stats = $stats_result->fetch_assoc();
         }
     </style>
 </head>
-<body>
-    <!-- Sidebar Navigation -->
+<body><!-- Sidebar Navigation -->
     <div id="mySidebar" class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-paw"></i> Doc Lenon
@@ -266,7 +265,7 @@ $stats = $stats_result->fetch_assoc();
         <a href="admin.php?page=products">
             <i class="fas fa-box"></i> Products Inventory
         </a>
-        <a href="post.php">
+        <a href="post.php" >
             <i class="fas fa-blog"></i> Post Management
         </a>
         <a href="calendar.php">
@@ -274,6 +273,9 @@ $stats = $stats_result->fetch_assoc();
         </a>
         <a href="history1.php" class="active">
             <i class="fas fa-history"></i> Appointment History
+        </a>
+        <a href="ordermanagement.php">
+            <i class="fas fa-box"></i> Order Management
         </a>
         <a href="logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout

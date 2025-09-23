@@ -332,7 +332,8 @@ if ($result && $result->num_rows > 0) {
     </style>
 </head>
 <body>
-    <!-- Sidebar Navigation -->
+    
+<!-- Sidebar Navigation -->
     <div id="mySidebar" class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-paw"></i> Doc Lenon
@@ -341,7 +342,7 @@ if ($result && $result->num_rows > 0) {
         <a href="admin.php?page=products">
             <i class="fas fa-box"></i> Products Inventory
         </a>
-        <a href="post.php" class="active">
+        <a href="post.php"class="active" >
             <i class="fas fa-blog"></i> Post Management
         </a>
         <a href="calendar.php">
@@ -349,6 +350,9 @@ if ($result && $result->num_rows > 0) {
         </a>
         <a href="history1.php">
             <i class="fas fa-history"></i> Appointment History
+        </a>
+        <a href="ordermanagement.php">
+            <i class="fas fa-box"></i> Order Management
         </a>
         <a href="logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout

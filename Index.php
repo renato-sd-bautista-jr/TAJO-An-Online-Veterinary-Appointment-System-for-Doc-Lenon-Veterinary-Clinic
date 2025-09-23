@@ -85,6 +85,7 @@
                             <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
                             <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
                             <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
+                            <li><a class="dropdown-item" href="Order-Products.php">Order Products</a></li>
       <!--<li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item" href="#">Separated link</a></li>-->
     </ul>

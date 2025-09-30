@@ -79,7 +79,7 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
             <i class="fas fa-paw"></i> Doc Lenon
         </div>
         <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products"class="active">
+        <a href="admin.php?page=products">
             <i class="fas fa-box"></i> Products Inventory
         </a>
         <a href="post.php" >
@@ -91,7 +91,7 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
         <a href="history1.php">
             <i class="fas fa-history"></i> Appointment History
         </a>
-        <a href="ordermanagement.php">
+        <a href="ordermanagement.php" class="active">
             <i class="fas fa-box"></i> Order Management
         </a>
         <a href="logout.php">

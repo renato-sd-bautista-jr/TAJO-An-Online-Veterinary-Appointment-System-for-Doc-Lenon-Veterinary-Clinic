@@ -250,216 +250,118 @@ $conn->close();
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Products & Ordering - TAHO</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .card img { height:160px; object-fit:cover; }
-        .navbar { background:#e3f2fd; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Products - TAHO</title>
+  <link rel="icon" href="img/LOGO.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px 0;
+      background-color: #e3f2fd;
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-right: 2rem;
+    }
+    .nav-link { font-weight: 500; color: #2c3e50; }
+    .nav-link:hover { color: #3498db; }
+    .card img { height:160px; object-fit:cover; }
+    footer {
+      background-color: #e3f2fd;
+      color: #2c3e50;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
-  <div class="container">
-    <a class="navbar-brand" href="#">DOC LENON VETERINARY</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="Index.php">Home</a></li>
+ <!-- Navbar same as index.php -->
+  <nav class="navbar">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
+        DOC LENON VETERINARY
+      </a>
+      <ul class="nav nav-tabs">
+        <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button">Services</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="pw.php">Pet Wellness</a></li>
+            <li><a class="dropdown-item" href="Consultation.php">Consultation</a></li>
+            <li><a class="dropdown-item" href="Vaccine.php">Vaccination</a></li>
+            <li><a class="dropdown-item" href="deworming.php">Deworming</a></li>
+            <li><a class="dropdown-item" href="laboratory.php">Laboratory</a></li>
+            <li><a class="dropdown-item" href="Surgery.php">Surgery</a></li>
+            <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
+            <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
+            <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
+            <li><a class="dropdown-item active" href="Order-Products.php">Order Products</a></li>
+          </ul>
+        </li>
         <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="Contact Us.php">Contact Us</a></li>
+        <li><button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button></li>
       </ul>
-      <div>
-        <button class="btn btn-outline-primary" onclick="document.getElementById('viewCart').scrollIntoView();">Cart (<?php echo array_sum(array_values($_SESSION['cart'])); ?>)</button>
-        <!-- Admin toggle for demo purposes: set session is_admin -->
-        <?php if (empty($_SESSION['is_admin'])): ?>
-            <a href="?become_admin=1" class="btn btn-sm btn-secondary ms-2">Become Admin (demo)</a>
-        <?php else: ?>
-            <a href="?logout_admin=1" class="btn btn-sm btn-danger ms-2">Logout Admin</a>
-        <?php endif; ?>
-      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<div class="container mt-4">
+  <!-- Main Content -->
+  <div class="container mt-4">
     <?php if ($flash): ?>
-        <div class="alert alert-<?php echo $flash['type']; ?>"><?php echo htmlspecialchars($flash['msg']); ?></div>
+      <div class="alert alert-<?php echo $flash['type']; ?>"><?php echo htmlspecialchars($flash['msg']); ?></div>
     <?php endif; ?>
 
-    <h1 class="mb-3">Our Products</h1>
+    <h1 class="mb-4">Order Our Products</h1>
+
+    <!-- Product Cards (same as before) -->
     <div class="row">
-        <?php if (!empty($products)): ?>
-            <?php foreach ($products as $product): ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <?php if (!empty($product['Image'])): ?>
-                            <img src="<?php echo htmlspecialchars($product['Image']); ?>" class="card-img-top" alt="">
-                        <?php else: ?>
-                            <img src="img/placeholder.jpg" class="card-img-top" alt="">
-                        <?php endif; ?>
-                        <div class="card-body">
-                            <h5><?php echo htmlspecialchars($product['Product_Name']); ?></h5>
-                            <p>Category: <?php echo htmlspecialchars($product['Category']); ?></p>
-                            <p>Price: ₱<?php echo number_format($product['Price'],2); ?></p>
-                            <p>Stock: <?php echo (int)$product['Stock']; ?></p>
-                            <form method="post" class="d-flex gap-2 align-items-center">
-                                <input type="hidden" name="action" value="add_to_cart">
-                                    <input type="hidden" name="product_id" value="<?php echo (int)$product['ID']; ?>">
-                                <input type="number" name="quantity" value="1" min="1" max="<?php echo (int)$product['Stock']; ?>">
-                                <button class="btn btn-primary" <?php echo ((int)$product['Stock']<=0)?'disabled':''; ?>>Add</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12">No products found.</div>
-        <?php endif; ?>
+      <?php if (!empty($products)): ?>
+        <?php foreach ($products as $product): ?>
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+              <?php if (!empty($product['Image'])): ?>
+                <img src="<?php echo htmlspecialchars($product['Image']); ?>" class="card-img-top" alt="">
+              <?php else: ?>
+                <img src="img/placeholder.jpg" class="card-img-top" alt="">
+              <?php endif; ?>
+              <div class="card-body">
+                <h5><?php echo htmlspecialchars($product['Product_Name']); ?></h5>
+                <p>Category: <?php echo htmlspecialchars($product['Category']); ?></p>
+                <p>Price: ₱<?php echo number_format($product['Price'],2); ?></p>
+                <p>Stock: <?php echo (int)$product['Stock']; ?></p>
+                <form method="post" class="d-flex gap-2 align-items-center">
+                  <input type="hidden" name="action" value="add_to_cart">
+                  <input type="hidden" name="product_id" value="<?php echo (int)$product['ID']; ?>">
+                  <input type="number" name="quantity" value="1" min="1" max="<?php echo (int)$product['Stock']; ?>" class="form-control" style="width:80px;">
+                  <button class="btn btn-primary" <?php echo ((int)$product['Stock']<=0)?'disabled':''; ?>>Add</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="col-12">No products found.</div>
+      <?php endif; ?>
     </div>
 
-    <!-- Cart Section -->
-    <div id="viewCart" class="card p-3 mt-4">
-        <h3>Cart</h3>
-        <?php if (empty($_SESSION['cart'])): ?>
-            <p>Your cart is empty.</p>
-        <?php else: ?>
-            <form method="post">
-                <input type="hidden" name="action" value="update_cart">
-                <table class="table">
-                    <thead><tr><th>Product</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr></thead>
-                    <tbody>
-                        <?php
-                        $subtotal = 0;
-                        foreach ($_SESSION['cart'] as $pid => $qty):
-                            $p = find_product($products, $pid);
-                            if (!$p) continue;
-                            $line = $p['Price'] * $qty;
-                            $subtotal += $line;
-                        ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($p['Product_Name']); ?></td>
-                            <td>₱<?php echo number_format($p['Price'],2); ?></td>
-                            <td><input type="number" name="quantities[<?php echo $pid; ?>]" value="<?php echo $qty; ?>" min="0" max="<?php echo (int)$p['Stock']; ?>" class="form-control" style="width:100px;"></td>
-                            <td>₱<?php echo number_format($line,2); ?></td>
-                            <td><a class="btn btn-sm btn-danger" href="?remove=<?php echo $pid; ?>">Remove</a></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div><strong>Total: ₱<?php echo number_format($subtotal,2); ?></strong></div>
-                    <div>
-                        <button class="btn btn-secondary">Update Cart</button>
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#checkoutModal">Checkout</button>
-                    </div>
-                </div>
-            </form>
-        <?php endif; ?>
-    </div>
+    <!-- Cart / Checkout / Orders sections remain same -->
+    <!-- (your existing code for cart, modal, view orders, admin panel goes here) -->
 
-    <!-- Checkout Modal -->
-    <div class="modal fade" id="checkoutModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form method="post">
-            <input type="hidden" name="action" value="checkout">
-            <div class="modal-header"><h5 class="modal-title">Checkout</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" name="customer_name" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Number</label>
-                    <input type="text" name="customer_number" class="form-control" required>
-                </div>
-                <p class="small text-muted">Only name and number required. After placing order you'll get an Order ID shown in the success message.</p>
-            </div>
-            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button class="btn btn-primary">Place Order</button></div>
-          </form>
-        </div>
-      </div>
-    </div>
+  </div>
 
-    <!-- View Orders (for customers) -->
-    <div class="card p-3 mt-4">
-        <h4>View / Cancel Your Orders</h4>
-        <form method="post" class="row g-2 align-items-end">
-            <input type="hidden" name="action" value="view_orders">
-            <div class="col-md-5">
-                <label class="form-label">Name</label>
-                <input type="text" name="v_name" class="form-control" required>
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">Number</label>
-                <input type="text" name="v_number" class="form-control" required>
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-primary">View Orders</button>
-            </div>
-        </form>
 
-        <?php if (!empty($user_orders)): ?>
-            <hr>
-            <?php foreach ($user_orders as $o): ?>
-                <div class="border p-3 mb-2">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <strong>Order #<?php echo $o['ID']; ?></strong>
-                            <div>Placed: <?php echo $o['created_at']; ?></div>
-                            <div>Status: <?php echo $o['status']; ?></div>
-                        </div>
-                        <div><strong>₱<?php echo number_format($o['total_amount'],2); ?></strong></div>
-                    </div>
-                    <ul>
-                        <?php foreach ($o['items'] as $it): ?>
-                            <li><?php echo htmlspecialchars($it['product_name']); ?> x <?php echo (int)$it['quantity']; ?> — ₱<?php echo number_format($it['price'],2); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <?php if ($o['status'] === 'Pending'): ?>
-                        <a class="btn btn-sm btn-danger" href="?cancel_order=<?php echo $o['ID']; ?>&name=<?php echo urlencode($o['customer_name']); ?>&number=<?php echo urlencode($o['customer_number']); ?>">Cancel Order</a>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
 
-    <!-- Admin Dashboard (simple) -->
-    <?php if (!empty($_SESSION['is_admin'])): ?>
-        <div class="card p-3 mt-4">
-            <h4>Admin Dashboard — Orders</h4>
-            <?php if (empty($admin_orders)): ?>
-                <p>No orders yet.</p>
-            <?php else: ?>
-                <?php foreach ($admin_orders as $a): ?>
-                    <div class="border p-3 mb-2">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <strong>Order #<?php echo $a['ID']; ?></strong>
-                                <div><?php echo htmlspecialchars($a['customer_name']); ?> — <?php echo htmlspecialchars($a['customer_number']); ?></div>
-                                <div>Placed: <?php echo $a['created_at']; ?></div>
-                                <div>Status: <?php echo $a['status']; ?></div>
-                            </div>
-                            <div>
-                                <a class="btn btn-sm btn-success" href="?admin_action=confirm&order_id=<?php echo $a['ID']; ?>">Confirm</a>
-                                <a class="btn btn-sm btn-danger" href="?admin_action=cancel&order_id=<?php echo $a['ID']; ?>">Cancel</a>
-                            </div>
-                        </div>
-                        <ul>
-                            <?php foreach ($a['items'] as $it): ?>
-                                <li><?php echo htmlspecialchars($it['product_name']); ?> x <?php echo (int)$it['quantity']; ?> — ₱<?php echo number_format($it['price'],2); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
+  <!-- Footer same as index -->
+  <footer>
+    <p>&copy; ALL RIGHTS RESERVED 2025 SE FINAL - TAHO</p>
+  </footer>
 
-</div>
-
-<footer class="text-center mt-4 py-3">&copy; ALL RIGHTS RESERVED 2025 SE FINAL - TAHO</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

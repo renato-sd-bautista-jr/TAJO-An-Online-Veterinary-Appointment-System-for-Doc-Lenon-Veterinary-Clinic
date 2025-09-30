@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2025 at 02:01 PM
+-- Generation Time: Sep 30, 2025 at 10:46 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,6 +40,13 @@ CREATE TABLE `appointments` (
   `status` varchar(20) DEFAULT 'Pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `appointments`
+--
+
+INSERT INTO `appointments` (`id`, `appointment_date`, `appointment_time`, `pet_name`, `pet_type`, `owner_name`, `owner_phone`, `service_type`, `notes`, `status`, `created_at`) VALUES
+(21, '2025-10-30', '09:00:00', 'snow', 'Cat', 'renato', '09654325678', 'Checkup', 'vomit', 'Pending', '2025-09-30 19:22:46');
 
 -- --------------------------------------------------------
 
@@ -208,7 +215,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `orders`

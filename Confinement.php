@@ -438,6 +438,7 @@ if(isset($_GET['get_content']) && isset($_GET['id'])) {
                             <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
                             <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
                             <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
+                            <li><a class="dropdown-item" href="Order-Products.php">Order Products</a></li>
                             
                         </ul>
                     </li>

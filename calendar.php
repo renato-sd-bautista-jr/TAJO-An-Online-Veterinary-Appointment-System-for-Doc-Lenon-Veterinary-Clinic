@@ -523,13 +523,13 @@ if ($cancelledCount > 0) {
 
     </style>
 </head>
-<body><!-- Sidebar Navigation -->
-    <div id="mySidebar" class="sidebar">
+ <!-- Sidebar Navigation -->
+   <div id="mySidebar" class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-paw"></i> Doc Lenon
         </div>
         <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products">
+        <a href="admin.php?page=products" >
             <i class="fas fa-box"></i> Products Inventory
         </a>
         <a href="post.php" >
@@ -544,10 +544,14 @@ if ($cancelledCount > 0) {
         <a href="ordermanagement.php">
             <i class="fas fa-box"></i> Order Management
         </a>
+        <a href="analytics.php">
+            <i class="fas fa-chart-bar"></i> Analytics
+        </a>
         <a href="logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
+
 
     <!-- Main Content -->
     <div id="main" class="main-content">
@@ -760,13 +764,13 @@ if ($cancelledCount > 0) {
                                 <div class="mb-3">
                                     <label class="form-label">Available Time Slots</label>
                                     <div class="d-flex flex-wrap gap-2" id="timeSlotContainer">
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">9:00 AM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">10:00 AM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">11:00 AM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="13:00 PM">13:00 PM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="14:00 PM">14:00 PM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="15:00 PM">15:00 PM</div>
-                                        <div class="time-slot" onclick="selectTimeSlot(this)" data-time="16:00 PM">16:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">9:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">10:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">11:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="13:00 PM">13:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="14:00 PM">14:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="15:00 PM">15:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="16:00 PM">16:00 PM</div>
                                     </div>
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>
@@ -797,9 +801,6 @@ if ($cancelledCount > 0) {
                                         <option value="">Select pet type</option>
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
-                                        <option value="Bird">Bird</option>
-                                        <option value="Rabbit">Rabbit</option>
-                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 

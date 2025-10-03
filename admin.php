@@ -355,12 +355,12 @@ if ($page == 'products') {
 </head>
 <body>
     <!-- Sidebar Navigation -->
-    <div id="mySidebar" class="sidebar">
+   <div id="mySidebar" class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-paw"></i> Doc Lenon
         </div>
         <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products"class="active">
+        <a href="admin.php?page=products" class="active">
             <i class="fas fa-box"></i> Products Inventory
         </a>
         <a href="post.php" >
@@ -375,10 +375,15 @@ if ($page == 'products') {
         <a href="ordermanagement.php">
             <i class="fas fa-box"></i> Order Management
         </a>
+        <a href="analytics.php">
+            <i class="fas fa-chart-bar"></i> Analytics
+        </a>
         <a href="logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
+
+
 
     <!-- Main Content -->
     <div id="main" class="main-content">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 30, 2025 at 10:46 PM
+-- Generation Time: Oct 03, 2025 at 04:13 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,7 +46,39 @@ CREATE TABLE `appointments` (
 --
 
 INSERT INTO `appointments` (`id`, `appointment_date`, `appointment_time`, `pet_name`, `pet_type`, `owner_name`, `owner_phone`, `service_type`, `notes`, `status`, `created_at`) VALUES
-(21, '2025-10-30', '09:00:00', 'snow', 'Cat', 'renato', '09654325678', 'Checkup', 'vomit', 'Pending', '2025-09-30 19:22:46');
+(21, '2025-10-30', '09:00:00', 'snow', 'Cat', 'renato', '09654325678', 'Checkup', 'vomit', 'Completed', '2025-09-30 19:22:46'),
+(22, '2025-10-30', '10:00:00', 'jess', 'Cat', 'renato', '2948712', 'Grooming', 'dirty cat', 'Pending', '2025-10-01 15:51:14'),
+(23, '2025-10-02', '09:00:00', 'Buddy', 'Dog', 'Alice Johnson', '09171234567', 'Vaccination', 'First vaccine', 'Cancelled', '2025-10-03 10:09:08'),
+(24, '2025-10-02', '10:00:00', 'Mittens', 'Cat', 'Brian Smith', '09182345678', 'Checkup', 'Coughing issue', 'Cancelled', '2025-10-03 10:09:08'),
+(25, '2025-10-02', '11:00:00', 'Charlie', 'Dog', 'Cathy Lee', '09193456789', 'Grooming', 'Full grooming', 'Completed', '2025-10-03 10:09:08'),
+(26, '2025-10-02', '01:00:00', 'Luna', 'Cat', 'Daniel Cruz', '09204567891', 'Checkup', 'Yearly check', 'Cancelled', '2025-10-03 10:09:08'),
+(27, '2025-10-02', '02:00:00', 'Rocky', 'Dog', 'Ella Torres', '09215678912', 'Surgery', 'Neutering', 'Cancelled', '2025-10-03 10:09:08'),
+(28, '2025-10-02', '03:00:00', 'Coco', 'Parrot', 'Francis Yu', '09226789123', 'Consultation', 'Feather loss', 'Cancelled', '2025-10-03 10:09:08'),
+(29, '2025-10-02', '04:00:00', 'Max', 'Dog', 'Grace Tan', '09237891234', 'Vaccination', 'Rabies shot', 'Cancelled', '2025-10-03 10:09:08'),
+(53, '2025-10-03', '01:00:00', 'Milo', 'Cat', 'Karen Chan', '09271234578', 'Grooming', 'Bath and trim', 'Cancelled', '2025-10-03 10:10:45'),
+(54, '2025-10-03', '02:00:00', 'Chico', 'Dog', 'Leo Ramos', '09282345689', 'Vaccination', 'Deworming', 'Cancelled', '2025-10-03 10:10:45'),
+(55, '2025-10-03', '03:00:00', 'Nala', 'Cat', 'Megan Cruz', '09293456790', 'Consultation', 'Loss of appetite', 'Cancelled', '2025-10-03 10:10:45'),
+(56, '2025-10-03', '04:00:00', 'Bruno', 'Dog', 'Nina Lopez', '09304567891', 'Checkup', 'Limping', 'Cancelled', '2025-10-03 10:10:45'),
+(58, '2025-10-04', '15:00:00', 'Snowy', 'Dog', 'Paula Reyes', '09326789123', 'Vaccination', 'Myxomatosis', 'Confirmed', '2025-10-03 10:10:45'),
+(59, '2025-10-04', '11:00:00', 'Shadow', 'Cat', 'Quinn Santos', '09337891234', 'Checkup', 'Sneezing', 'Confirmed', '2025-10-03 10:10:45'),
+(61, '2025-10-04', '14:00:00', 'Mochi', 'Cat', 'Sophia Lim', '09359012356', 'Grooming', 'Nail trim', 'Confirmed', '2025-10-03 10:10:45'),
+(62, '2025-10-04', '16:00:00', 'Bubbles', 'Fish', 'Timothy Go', '09360123467', 'Consultation', 'White spots', 'Confirmed', '2025-10-03 10:10:45'),
+(63, '2025-08-05', '09:00:00', 'Bella', 'Dog', 'Alice Smith', '09171234567', 'Check-up', 'Routine annual check', 'Completed', '2025-08-01 02:00:00'),
+(64, '2025-08-10', '11:00:00', 'Whiskers', 'Cat', 'John Doe', '09281234567', 'Vaccination', 'Rabies shot', 'Completed', '2025-08-05 01:30:00'),
+(65, '2025-08-18', '01:00:00', 'Rex', 'Dog', 'Maria Garcia', '09391234567', 'Surgery', 'Minor surgery', 'Completed', '2025-08-10 06:00:00'),
+(66, '2025-09-02', '10:00:00', 'Chloe', 'Cat', 'Robert Johnson', '09451234567', 'Check-up', 'Fever symptoms', 'Completed', '2025-09-01 04:00:00'),
+(67, '2025-09-08', '03:00:00', 'Buddy', 'Dog', 'Emily Davis', '09561234567', 'Grooming', 'Full grooming service', 'Completed', '2025-09-05 01:00:00'),
+(68, '2025-09-15', '02:00:00', 'Max', 'Dog', 'Daniel Lee', '09671234567', 'Vaccination', 'Deworming', 'Completed', '2025-09-07 07:20:00'),
+(69, '2024-03-12', '10:00:00', 'Nala', 'Dog', 'Victor Reyes', '09123456789', 'Check-up', 'Puppy exam', 'Completed', '2024-03-05 00:00:00'),
+(70, '2024-05-20', '02:00:00', 'Simba', 'Cat', 'Olivia Cruz', '09223456789', 'Surgery', 'Spay surgery', 'Completed', '2024-05-15 06:30:00'),
+(71, '2024-07-08', '09:00:00', 'Shadow', 'Dog', 'Chris Lim', '09323456789', 'Vaccination', 'Anti-rabies', 'Completed', '2024-07-01 01:00:00'),
+(72, '2024-09-18', '01:00:00', 'Luna', 'Cat', 'Samantha Tan', '09423456789', 'Check-up', 'Weight loss issue', 'Completed', '2024-09-10 05:00:00'),
+(73, '2024-11-25', '03:00:00', 'Mochi', 'Rabbit', 'Ethan Young', '09523456789', 'Check-up', 'Dental exam', 'Completed', '2024-11-20 07:30:00'),
+(74, '2025-07-12', '10:00:00', 'Buster', 'Dog', 'David Cruz', '09623456789', 'Check-up', 'Ear infection', 'Cancelled', '2025-07-05 02:00:00'),
+(75, '2025-08-21', '02:00:00', 'Snowball', 'Cat', 'Sarah Lee', '09723456789', 'Vaccination', '2nd round vaccine', 'Cancelled', '2025-08-10 08:00:00'),
+(76, '2025-09-30', '09:00:00', 'Lucky', 'Dog', 'Kevin Santos', '09823456789', 'Grooming', 'Bath & trim', 'Cancelled', '2025-09-20 02:00:00'),
+(77, '2025-10-05', '04:00:00', 'mr aaaaaaaaaaaaaaaa', 'Dog', 'alvin', '6546879', 'Checkup', 'not barking', 'Pending', '2025-10-03 12:57:38'),
+(78, '2025-10-05', '09:00:00', 'snoop', 'Cat', 'thea', '11654863', 'Checkup', 'what da dog doin', 'Pending', '2025-10-03 13:00:49');
 
 -- --------------------------------------------------------
 
@@ -215,7 +247,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `orders`

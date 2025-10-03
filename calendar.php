@@ -155,9 +155,9 @@ if ($result->num_rows > 0) {
     }
 }
 
-// Also update the calendar appointments query to include ID
 $appointments = [];
-$sql = "SELECT id, appointment_date, appointment_time, pet_name, service_type FROM appointments";
+$sql = "SELECT id, appointment_date, appointment_time, pet_name, service_type, status 
+        FROM appointments";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -167,17 +167,22 @@ if ($result->num_rows > 0) {
             'id' => $row['id'],
             'time' => date('g:i A', strtotime($row['appointment_time'])),
             'pet_name' => $row['pet_name'],
-            'service' => $row['service_type']
+            'service' => $row['service_type'],
+            'status' => $row['status'] ?? 'Pending' // fallback if NULL
         ];
     }
 }
-// Add these functions at the beginning of calendar.php, after database connection
 
+// Add these functions at the beginning of calendar.php, after database connection
 // Handle appointment editing
 if (isset($_POST['update_appointment'])) {
     $appointment_id = $conn->real_escape_string($_POST['appointment_id']);
     $appointment_date = $conn->real_escape_string($_POST['appointment_date']);
-    $appointment_time = $conn->real_escape_string($_POST['appointment_time']);
+    
+    // Convert to 24-hour format for DB
+    $appointment_time_12h = $_POST['appointment_time']; // e.g. "3:00 PM"
+    $appointment_time = date("H:i:s", strtotime($appointment_time_12h)); // -> "15:00:00"
+
     $pet_name = $conn->real_escape_string($_POST['pet_name']);
     $pet_type = $conn->real_escape_string($_POST['pet_type']);
     $owner_name = $conn->real_escape_string($_POST['owner_name']);
@@ -203,6 +208,7 @@ if (isset($_POST['update_appointment'])) {
         $message = "Error updating appointment: " . $conn->error;
     }
 }
+
 
 // Handle appointment deletion
 if (isset($_GET['delete_appointment'])) {
@@ -456,6 +462,24 @@ if ($cancelledCount > 0) {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        
+        .status-confirmed {
+            background-color: #28a745; /* green */
+            color: #fff;
+        }
+        .status-completed {
+            background-color: #007bff; /* blue */
+            color: #fff;
+        }
+        .status-cancelled {
+            background-color: #dc3545; /* red */
+            color: #fff;
+        }
+        .status-pending {
+            background-color: #ffc107; /* yellow */
+            color: #000;
+        }
         
         .calendar-date.today {
             background-color: #f8f9fa;
@@ -630,18 +654,38 @@ if ($cancelledCount > 0) {
                                         echo '<div class="' . $class . '" data-date="' . $currentDate . '" onclick="showAppointments(\'' . $currentDate . '\')">';
                                         echo '<div class="date-number">' . $day . '</div>';
                                         
-                                        // Display appointments for this day
                                         if ($hasAppointments) {
-                                            foreach ($appointments[$currentDate] as $index => $apt) {
-                                                if ($index < 2) { // Limit to showing 2 appointments
-                                                    echo '<div class="appointment">' . $apt['pet_name'] . ' - ' . $apt['service'] . '</div>';
-                                                } elseif ($index == 2) {
-                                                    $remaining = count($appointments[$currentDate]) - 2;
-                                                    echo '<div class="appointment">+' . $remaining . ' more</div>';
-                                                    break;
-                                                }
-                                            }
-                                        }
+    foreach ($appointments[$currentDate] as $index => $apt) {
+        if ($index < 2) {
+            // assign a class based on status
+            $statusClass = '';
+            switch ($apt['status']) {
+                case 'Confirmed':
+                    $statusClass = 'status-confirmed';
+                    break;
+                case 'Completed':
+                    $statusClass = 'status-completed';
+                    break;
+                case 'Cancelled':
+                    $statusClass = 'status-cancelled';
+                    break;
+                default:
+                    $statusClass = 'status-pending';
+            }
+
+            // add tooltip so long names are still accessible
+            echo '<div class="appointment ' . $statusClass . '" 
+                     title="' . htmlspecialchars($apt['pet_name'] . ' - ' . $apt['service']) . '">'
+                   . htmlspecialchars($apt['pet_name']) . ' - ' . htmlspecialchars($apt['service']) .
+                 '</div>';
+        } elseif ($index == 2) {
+            $remaining = count($appointments[$currentDate]) - 2;
+            echo '<div class="appointment">+' . $remaining . ' more</div>';
+            break;
+        }
+    }
+}
+
                                         
                                         echo '</div>';
                                     }
@@ -758,7 +802,7 @@ if ($cancelledCount > 0) {
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="appointment_date" class="form-label">Appointment Date</label>
-                                    <input type="date" class="form-control" id="appointment_date" name="appointment_date" required>
+                                    <input type="date" class="form-control" id="appointment_date" name="appointment_date" requiredmin="<?php echo date('Y-m-d'); ?>">
                                 </div>
                                 
                                 <div class="mb-3">
@@ -767,10 +811,10 @@ if ($cancelledCount > 0) {
                                             <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">9:00 AM</div>
                                             <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">10:00 AM</div>
                                             <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">11:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="13:00 PM">13:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="14:00 PM">14:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="15:00 PM">15:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="16:00 PM">16:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="1:00 PM">1:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="2:00 PM">2:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="3:00 PM">3:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="4:00 PM">4:00 PM</div>
                                     </div>
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>
@@ -866,7 +910,12 @@ if ($cancelledCount > 0) {
                 checkBookedTimeSlots(this.value);
             });
         });
-        
+        document.getElementById('appointment_date').addEventListener('change', function () {
+            const date = this.value;
+            if (date) {
+                checkBookedSlots(date);
+            }
+        });
         // Function to check booked time slots for a selected date
         function checkBookedTimeSlots(date) {
     // COMPLETELY reset all time slots first - both classes and styles
@@ -939,21 +988,43 @@ if ($cancelledCount > 0) {
             slot.style.color = '#6c757d';
             slot.style.cursor = 'not-allowed';
         }
+
+        function checkBookedSlots(date) {
+        fetch('calendar.php?check_slots=' + date)
+            .then(response => response.json())
+            .then(data => {
+                const booked = data.bookedSlots;
+
+                document.querySelectorAll('.time-slot').forEach(slot => {
+                    const time = slot.getAttribute('data-time');
+
+                    if (booked.includes(time)) {
+                        slot.classList.add('disabled'); // add disabled style
+                        slot.onclick = null; // disable click
+                    } else {
+                        slot.classList.remove('disabled');
+                        slot.setAttribute('onclick', 'selectTimeSlot(this)');
+                    }
+                });
+            });
+        }
         
         // Convert time from 12-hour format to 24-hour format
         function convertTo24Hour(time12h) {
             const [time, modifier] = time12h.split(' ');
             let [hours, minutes] = time.split(':');
-            
-            if (hours === '12') {
-                hours = '00';
+
+            hours = parseInt(hours, 10);
+            minutes = parseInt(minutes || '0', 10);
+
+            if (modifier === 'PM' && hours !== 12) {
+                hours += 12;
             }
-            
-            if (modifier === 'PM') {
-                hours = parseInt(hours, 10) + 12;
+            if (modifier === 'AM' && hours === 12) {
+                hours = 0;
             }
-            
-            return parseInt(hours, 10);
+
+            return hours;
         }
         
         // Modified selectTimeSlot function
@@ -1239,6 +1310,8 @@ if ($cancelledCount > 0) {
             // Set the hidden input value
             document.getElementById('appointment_time').value = element.textContent.trim();
         }
+
+        
     </script>
 
     <!-- Bootstrap Bundle with Popper -->

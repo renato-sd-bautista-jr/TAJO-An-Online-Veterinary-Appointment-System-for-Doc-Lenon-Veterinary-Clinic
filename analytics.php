@@ -255,8 +255,12 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
                 </div>
 
             <?php elseif ($view === 'bar' || $view === 'pie'): ?>
-                <canvas id="analyticsChart" height="120"></canvas>
-                <script>
+    <div class="d-flex justify-content-center">
+        <canvas id="analyticsChart" 
+            <?php if ($view === 'pie') echo 'style="max-width:500px; max-height:500px;"'; ?> 
+            height="120"></canvas>
+    </div>
+    <script>
                     const labels = <?php echo json_encode(array_column($analytics, 'period')); ?>;
                     const total = <?php echo json_encode(array_column($analytics, 'total')); ?>;
                     const pending = <?php echo json_encode(array_column($analytics, 'pending')); ?>;

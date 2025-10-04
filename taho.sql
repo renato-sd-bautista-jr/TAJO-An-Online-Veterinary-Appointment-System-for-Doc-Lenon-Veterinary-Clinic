@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 03, 2025 at 04:13 PM
+-- Generation Time: Oct 04, 2025 at 11:27 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,10 +59,10 @@ INSERT INTO `appointments` (`id`, `appointment_date`, `appointment_time`, `pet_n
 (54, '2025-10-03', '02:00:00', 'Chico', 'Dog', 'Leo Ramos', '09282345689', 'Vaccination', 'Deworming', 'Cancelled', '2025-10-03 10:10:45'),
 (55, '2025-10-03', '03:00:00', 'Nala', 'Cat', 'Megan Cruz', '09293456790', 'Consultation', 'Loss of appetite', 'Cancelled', '2025-10-03 10:10:45'),
 (56, '2025-10-03', '04:00:00', 'Bruno', 'Dog', 'Nina Lopez', '09304567891', 'Checkup', 'Limping', 'Cancelled', '2025-10-03 10:10:45'),
-(58, '2025-10-04', '15:00:00', 'Snowy', 'Dog', 'Paula Reyes', '09326789123', 'Vaccination', 'Myxomatosis', 'Confirmed', '2025-10-03 10:10:45'),
-(59, '2025-10-04', '11:00:00', 'Shadow', 'Cat', 'Quinn Santos', '09337891234', 'Checkup', 'Sneezing', 'Confirmed', '2025-10-03 10:10:45'),
-(61, '2025-10-04', '14:00:00', 'Mochi', 'Cat', 'Sophia Lim', '09359012356', 'Grooming', 'Nail trim', 'Confirmed', '2025-10-03 10:10:45'),
-(62, '2025-10-04', '16:00:00', 'Bubbles', 'Fish', 'Timothy Go', '09360123467', 'Consultation', 'White spots', 'Confirmed', '2025-10-03 10:10:45'),
+(58, '2025-10-04', '15:00:00', 'Snowy', 'Dog', 'Paula Reyes', '09326789123', 'Vaccination', 'Myxomatosis', 'Cancelled', '2025-10-03 10:10:45'),
+(59, '2025-10-04', '11:00:00', 'Shadow', 'Cat', 'Quinn Santos', '09337891234', 'Checkup', 'Sneezing', 'Cancelled', '2025-10-03 10:10:45'),
+(61, '2025-10-04', '14:00:00', 'Mochi', 'Cat', 'Sophia Lim', '09359012356', 'Grooming', 'Nail trim', 'Cancelled', '2025-10-03 10:10:45'),
+(62, '2025-10-04', '16:00:00', 'Bubbles', 'Fish', 'Timothy Go', '09360123467', 'Consultation', 'White spots', 'Cancelled', '2025-10-03 10:10:45'),
 (63, '2025-08-05', '09:00:00', 'Bella', 'Dog', 'Alice Smith', '09171234567', 'Check-up', 'Routine annual check', 'Completed', '2025-08-01 02:00:00'),
 (64, '2025-08-10', '11:00:00', 'Whiskers', 'Cat', 'John Doe', '09281234567', 'Vaccination', 'Rabies shot', 'Completed', '2025-08-05 01:30:00'),
 (65, '2025-08-18', '01:00:00', 'Rex', 'Dog', 'Maria Garcia', '09391234567', 'Surgery', 'Minor surgery', 'Completed', '2025-08-10 06:00:00'),
@@ -78,7 +78,34 @@ INSERT INTO `appointments` (`id`, `appointment_date`, `appointment_time`, `pet_n
 (75, '2025-08-21', '02:00:00', 'Snowball', 'Cat', 'Sarah Lee', '09723456789', 'Vaccination', '2nd round vaccine', 'Cancelled', '2025-08-10 08:00:00'),
 (76, '2025-09-30', '09:00:00', 'Lucky', 'Dog', 'Kevin Santos', '09823456789', 'Grooming', 'Bath & trim', 'Cancelled', '2025-09-20 02:00:00'),
 (77, '2025-10-05', '04:00:00', 'mr aaaaaaaaaaaaaaaa', 'Dog', 'alvin', '6546879', 'Checkup', 'not barking', 'Pending', '2025-10-03 12:57:38'),
-(78, '2025-10-05', '09:00:00', 'snoop', 'Cat', 'thea', '11654863', 'Checkup', 'what da dog doin', 'Pending', '2025-10-03 13:00:49');
+(78, '2025-10-05', '09:00:00', 'snoop', 'Cat', 'thea', '11654863', 'Checkup', 'what da dog doin', 'Pending', '2025-10-03 13:00:49'),
+(80, '2025-10-15', '11:00:00', 'hassan', 'Dog', 'alvin', '234135235333', 'Vaccination', 'werw', 'Pending', '2025-10-04 21:24:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category`
+--
+
+CREATE TABLE `category` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `category`
+--
+
+INSERT INTO `category` (`id`, `name`) VALUES
+(2, 'Cat Food'),
+(1, 'Dog Food'),
+(5, 'Grooming Supplies'),
+(9, 'Leashes & Collars'),
+(6, 'Medications'),
+(3, 'Pet Accessories'),
+(8, 'Pet Beds'),
+(7, 'Toys'),
+(4, 'Vitamins & Supplements');
 
 -- --------------------------------------------------------
 
@@ -149,8 +176,8 @@ CREATE TABLE `posts` (
 --
 
 INSERT INTO `posts` (`ID`, `Title`, `Content`, `Category`, `Image`, `Created_at`, `Updated_at`) VALUES
-(1, 'Testing', '<div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px; color: rgb(236, 236, 236); font-family: Arial, sans-serif; font-size: 14px; background-color: rgb(16, 18, 24);\"><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Ako ay isang model</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Doon sa Ermita</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Gabi-gabi sa disco</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">At nagpapabongga</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sa pagka-istariray</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Talbog lahat sila</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ang mga foreigner</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ay nagkakandarapa</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">\'Pag ako\'y sumayaw na</span></b></div><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Ako\'y may nakilala</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Mestizo na Hapon</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na-in-love siya sa akin</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Type n\'yang gawing girlfriend</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ako\'y niregaluhan</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Bahay, lupa\'t datung</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ang \'di n\'ya lang alam</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">At \'di ko masabi</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na ako\'y isang...</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">\"Darna!\" (Darna! Darna! Darna!)</span></b></div><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Ang iniingat-ingatan ko</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ang ugat, lawit at muscle ko</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na tinatago-tago ko pa</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sa t\'wing kami\'y magkasama</span></b></div><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Ako\'y nananalangin</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na sana\'y manawari</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">\'Wag sanang mabuking</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Nakatali kong akin</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na ubod nang itim</span></b></div><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Ang iniingat-ingatan ko</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ang ugat, lawit at muscle ko</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Na tinatago-tago ko pa</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sa t\'wing kami\'y magkasama</span></b></div><div jsname=\"U8S5sf\" class=\"ujudUb\" style=\"margin-bottom: 12px;\"><b><span jsname=\"YS01Ge\">Kami\'y biglang nagkita</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Nang \'di sinasadya</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sa restroom ng lalaki</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Doon sa Megamall</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Napatingin siya sa \'kin</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ako\'y napahiya</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sa galit ng Hapon</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Inumbag n\'ya ako</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">\"バカヤロ, what is that?\"</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">\"Just like yours, papa\"</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Sira ang beauty ko</span></b></div><p style=\"margin-bottom: 0px;\"><b><span jsname=\"YS01Ge\">Binawi pa\'ng lahat</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Bahay, lupa\'t datung</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ng nobyo kong Hapon</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Kaya ang beauty ko ngayon</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Nagtitinda na lang</span><br aria-hidden=\"true\"><span jsname=\"YS01Ge\">Ng itlog at talong</span></b></p></div></div>', 'Pet Wellness', 'post_images/1743857673_449699514_336036782881611_5525702645839532818_n.jpg', '2025-04-05 20:54:33', '2025-04-05 20:55:30'),
-(2, 'Testing1', 'asd asd asd asd aasd asd aasd asd asd asd asd asd asdasdasdasda sa  da ads ads ads ad sad sa s ad dsa sda dsa sad ad sad as a as ', 'Consultation', 'post_images/1743864946_s1.jpg', '2025-04-05 22:55:46', '2025-04-05 22:56:14');
+(1, 'Water', 'Dont forget to stay hydrated,even for your furpets', 'Pet Wellness', 'post_images/1759611132_1758013764_Screenshot_2024-09-07-04-50-20-345_com.facebook.katana.png', '2025-04-05 20:54:33', '2025-10-05 04:52:12'),
+(2, 'Free Vaccination', 'Free 1 vaccination after you vaccine 2 pet', 'Vaccination', 'post_images/1759611067_1758013764_Screenshot_2024-09-07-04-50-20-345_com.facebook.katana.png', '2025-04-05 22:55:46', '2025-10-05 04:51:07');
 
 -- --------------------------------------------------------
 
@@ -172,7 +199,37 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`ID`, `Product_Name`, `Category`, `Price`, `Image`, `Stock`) VALUES
-(12, 'Whiskas Cat Food 1kg', 'cat food', 100, 'product_images/1758610895_1745307991_8.png', 22);
+(12, 'Whiskas Cat Food 1kg', 'Cat Food', 100, 'product_images/1758610895_1745307991_8.png', 22),
+(13, 'Pet Stainless feed bowl', 'Pet Accessories', 120, 'product_images/1759607906_1745306006_16.png', 78),
+(14, 'Catnip Garden ', 'Cat Food', 200, 'product_images/1759608162_1745307675_18 (5).png', 70),
+(15, 'Catnip Garden ', 'Cat Food', 200, 'product_images/1759608268_1745307675_18 (5).png', 70);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `servicecategory`
+--
+
+CREATE TABLE `servicecategory` (
+  `ID` int(11) NOT NULL,
+  `Category_Name` varchar(100) NOT NULL,
+  `Created_At` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `servicecategory`
+--
+
+INSERT INTO `servicecategory` (`ID`, `Category_Name`, `Created_At`) VALUES
+(1, 'Pet Wellness', '2025-10-04 20:50:12'),
+(2, 'Consultation', '2025-10-04 20:50:12'),
+(3, 'Vaccination', '2025-10-04 20:50:12'),
+(4, 'Deworming', '2025-10-04 20:50:12'),
+(5, 'Laboratory', '2025-10-04 20:50:12'),
+(6, 'Surgery', '2025-10-04 20:50:12'),
+(7, 'Confinement', '2025-10-04 20:50:12'),
+(8, 'Grooming', '2025-10-04 20:50:12'),
+(9, 'Pet Boarding', '2025-10-04 20:50:12');
 
 -- --------------------------------------------------------
 
@@ -208,6 +265,13 @@ ALTER TABLE `appointments`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `category`
+--
+ALTER TABLE `category`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
@@ -233,6 +297,13 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indexes for table `servicecategory`
+--
+ALTER TABLE `servicecategory`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `Category_Name` (`Category_Name`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -247,7 +318,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+
+--
+-- AUTO_INCREMENT for table `category`
+--
+ALTER TABLE `category`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -271,7 +348,13 @@ ALTER TABLE `posts`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `servicecategory`
+--
+ALTER TABLE `servicecategory`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`

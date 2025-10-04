@@ -179,23 +179,26 @@ if ($page == 'products') {
     }
 
     // Get search term for category filtering
-    $search_category = isset($_GET['search_category']) ? $_GET['search_category'] : '';
+    $search_name = $_GET['search_name'] ?? '';
+    $filter_category = $_GET['filter_category'] ?? '';
 
-    // Fetch products with optional category filter
-    if (!empty($search_category)) {
-        $sql = "SELECT * FROM products WHERE Category LIKE ? ORDER BY Category, Product_Name";
-        $stmt = $conn->prepare($sql);
-        $search_param = "%" . $search_category . "%";
-        $stmt->bind_param("s", $search_param);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    } else {
-        $sql = "SELECT * FROM products ORDER BY Category, Product_Name";
-        $result = $conn->query($sql);
+    $query = "SELECT * FROM products WHERE 1=1";
+
+    if (!empty($search_name)) {
+        $safe_name = "%" . $conn->real_escape_string($search_name) . "%";
+        $query .= " AND Product_Name LIKE '$safe_name'";
     }
 
+    if (!empty($filter_category)) {
+        $safe_category = $conn->real_escape_string($filter_category);
+        $query .= " AND Category = '$safe_category'";
+    }
+
+    $query .= " ORDER BY Category, Product_Name";
+    $result = $conn->query($query);
+
     $products = [];
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $products[] = $row;
         }
@@ -351,6 +354,22 @@ if ($page == 'products') {
             top: 15px;
             left: 15px;
         }
+            .table thead th {
+            white-space: nowrap;
+        }
+
+        .img-thumbnail {
+            border-radius: 8px;
+        }
+
+        .alert-info {
+            font-size: 0.9rem;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -441,13 +460,19 @@ if ($page == 'products') {
                                     
                                     <div class="mb-3">
                                         <label for="category" class="form-label">Category</label>
-                                        <input type="text" class="form-control" id="category" name="category" list="category-list"
-                                               value="<?php echo $edit_product ? $edit_product['Category'] : ''; ?>" required>
-                                        <datalist id="category-list">
-                                            <?php foreach ($categories as $cat): ?>
-                                                <option value="<?php echo $cat; ?>">
-                                            <?php endforeach; ?>
-                                        </datalist>
+                                        <select class="form-select" id="category" name="category" required>
+                                            <option value="">-- Select Category --</option>
+                                            <?php
+                                            // Fetch categories from DB
+                                            $catQuery = $conn->query("SELECT name FROM category ORDER BY name ASC");
+                                            if ($catQuery && $catQuery->num_rows > 0) {
+                                                while ($cat = $catQuery->fetch_assoc()) {
+                                                    $selected = ($edit_product && $edit_product['Category'] == $cat['name']) ? 'selected' : '';
+                                                    echo "<option value='{$cat['name']}' $selected>{$cat['name']}</option>";
+                                                }
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                     
                                     <div class="mb-3">
@@ -502,92 +527,109 @@ if ($page == 'products') {
                     </div>
                     
                     <div class="col-md-8">
-                        <!-- Product List -->
-                        <div class="card">
-                            <div class="card-header">
-                                Product List
-                            </div>
-                            <div class="card-body">
-                                <!-- Category Search Bar -->
-                                <div class="search-container">
-                                    <form method="get" class="mb-3">
-                                        <input type="hidden" name="page" value="products">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Search by category..." 
-                                                   name="search_category" value="<?php echo htmlspecialchars($search_category); ?>" 
-                                                   list="search-category-list">
-                                            <datalist id="search-category-list">
-                                                <?php foreach ($categories as $cat): ?>
-                                                    <option value="<?php echo $cat; ?>">
-                                                <?php endforeach; ?>
-                                            </datalist>
-                                            <button class="btn btn-primary" type="submit">
-                                                <i class="fas fa-search"></i>
-                                            </button>
-                                            <?php if (!empty($search_category)): ?>
-                                                <a href="?page=products" class="btn btn-secondary">
-                                                    <i class="fas fa-times"></i> Clear
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </form>
-                                    
-                                    <?php if (!empty($search_category)): ?>
-                                        <div class="alert alert-info">
-                                            Showing products with category matching: <strong><?php echo htmlspecialchars($search_category); ?></strong>
-                                            (<?php echo count($products); ?> results found)
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Image</th>
-                                                <th>Product Name</th>
-                                                <th>Category</th>
-                                                <th>Price</th>
-                                                <th>Stock</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (count($products) > 0): ?>
-                                                <?php foreach ($products as $product): ?>
-                                                    <tr>
-                                                        <td>
-                                                            <?php if (!empty($product['Image'])): ?>
-                                                                <img src="<?php echo $product['Image']; ?>" alt="<?php echo $product['Product_Name']; ?>" class="product-image">
-                                                            <?php else: ?>
-                                                                <div class="text-center text-muted">No image</div>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td><?php echo $product['Product_Name']; ?></td>
-                                                        <td><?php echo $product['Category']; ?></td>
-                                                        <td>₱<?php echo number_format($product['Price'], 2); ?></td>
-                                                        <td><?php echo $product['Stock']; ?></td> 
-                                                        <td class="action-buttons">
-                                                            <a href="?page=products&edit=<?php echo $product['ID']; ?><?php echo !empty($search_category) ? '&search_category=' . urlencode($search_category) : ''; ?>" class="btn btn-sm btn-primary" title="Edit">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $product['ID']; ?>, '<?php echo !empty($search_category) ? urlencode($search_category) : ''; ?>')" class="btn btn-sm btn-danger" title="Delete">
-                                                                <i class="fas fa-trash-alt"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <tr>
-                                                    <td colspan="5" class="text-center">No products found</td>
-                                                </tr>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Product List -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Product List</h5>
+        </div>
+        <div class="card-body">
+            <!-- Search and Filter -->
+            <form method="get" class="mb-3">
+                <input type="hidden" name="page" value="products">
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" name="search_name" placeholder="Search by product name..."
+                               value="<?php echo htmlspecialchars($_GET['search_name'] ?? ''); ?>">
                     </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="filter_category">
+                            <option value="">-- Filter by Category --</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo htmlspecialchars($cat); ?>" 
+                                    <?php echo (isset($_GET['filter_category']) && $_GET['filter_category'] === $cat) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($cat); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-50">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="?page=products" class="btn btn-secondary w-50">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <?php if (!empty($_GET['search_name']) || !empty($_GET['filter_category'])): ?>
+                <div class="alert alert-info">
+                    Showing products 
+                    <?php if (!empty($_GET['search_name'])): ?>
+                        with name containing <strong><?php echo htmlspecialchars($_GET['search_name']); ?></strong>
+                    <?php endif; ?>
+                    <?php if (!empty($_GET['filter_category'])): ?>
+                        in category <strong><?php echo htmlspecialchars($_GET['filter_category']); ?></strong>
+                    <?php endif; ?>
+                    (<?php echo count($products); ?> results found)
+                </div>
+            <?php endif; ?>
+
+            <!-- Product Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($products) > 0): ?>
+                            <?php foreach ($products as $product): ?>
+                                <tr>
+                                    <td style="width: 70px;">
+                                        <?php if (!empty($product['Image'])): ?>
+                                            <img src="<?php echo htmlspecialchars($product['Image']); ?>" 
+                                                 alt="Product Image" class="img-thumbnail" style="height: 60px; width: 60px; object-fit: cover;">
+                                        <?php else: ?>
+                                            <div class="text-muted text-center small">No Image</div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($product['Product_Name']); ?></td>
+                                    <td><?php echo htmlspecialchars($product['Category']); ?></td>
+                                    <td>₱<?php echo number_format($product['Price'], 2); ?></td>
+                                    <td><?php echo htmlspecialchars($product['Stock']); ?></td>
+                                    <td class="text-center">
+                                        <a href="?page=products&edit=<?php echo $product['ID']; ?>" 
+                                           class="btn btn-sm btn-primary" title="Edit">
+                                           <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" 
+                                           onclick="confirmDelete(<?php echo $product['ID']; ?>)" 
+                                           class="btn btn-sm btn-danger" title="Delete">
+                                           <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
                 </div>
             <?php endif; ?>
         </div>

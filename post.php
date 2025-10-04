@@ -45,11 +45,15 @@ $page = 'posts';
 $sql = "SELECT DISTINCT Category FROM posts ORDER BY Category";
 $result = $conn->query($sql);
 $categories = [];
+$result = $conn->query("SELECT Category_Name FROM servicecategory ORDER BY Category_Name ASC");
 
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $categories[] = $row['Category'];
+        $categories[] = $row['Category_Name'];
     }
+} else {
+    // Fallback in case no categories exist yet
+    $categories = ['Pet Wellness', 'Consultation', 'Vaccination', 'Surgery', 'Grooming'];
 }
 
 // Handle post form submission for adding or updating
@@ -418,13 +422,21 @@ if ($result && $result->num_rows > 0) {
                                 
                                 <div class="mb-3">
                                     <label for="category" class="form-label">Category</label>
-                                    <input type="text" class="form-control" id="category" name="category" list="category-list"
-                                           value="<?php echo $edit_post ? htmlspecialchars($edit_post['Category']) : ''; ?>" required>
-                                    <datalist id="category-list">
+                                    <select class="form-select" id="category" name="category" required>
+                                        <option value="">-- Select Category --</option>
                                         <?php foreach ($categories as $cat): ?>
-                                            <option value="<?php echo htmlspecialchars($cat); ?>">
+                                            <option value="<?php echo htmlspecialchars($cat); ?>"
+                                                <?php 
+                                                    if ($edit_post && $edit_post['Category'] === $cat) {
+                                                        echo 'selected';
+                                                    } elseif (!$edit_post && $cat === 'Pet Wellness') {
+                                                        echo 'selected';
+                                                    }
+                                                ?>>
+                                                <?php echo htmlspecialchars($cat); ?>
+                                            </option>
                                         <?php endforeach; ?>
-                                    </datalist>
+                                    </select>
                                 </div>
                                 
                                 <div class="mb-3">

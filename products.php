@@ -1,141 +1,185 @@
 <?php
-// Start session
 session_start();
-
-// Check if admin is logged in
-
 
 // Database connection
 $servername = "localhost";
-$username = "root"; // Change to your database username
-$password = ""; // Change to your database password
-$dbname = "taho"; // Change to your database name
-
+$username = "root";
+$password = "";
+$dbname = "taho";
 $conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Fetch categories for filter
+$catQuery = $conn->query("SELECT name FROM category ORDER BY name ASC");
+$categories = [];
+while ($cat = $catQuery->fetch_assoc()) {
+    $categories[] = $cat['name'];
 }
 
-// Fetch products from the database
+// Fetch products
 $sql = "SELECT * FROM products ORDER BY Category, Product_Name";
 $result = $conn->query($sql);
-
 $products = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $products[] = $row;
-    }
+while ($row = $result->fetch_assoc()) {
+    $products[] = $row;
 }
-
 $conn->close();
 ?>
 
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Products - TAHO</title>
-    <link rel="icon" href="img/LOGO.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        .card img {
-            height: 200px;
-            object-fit: cover;
-        }
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 15px 0;
-            background-color: #e3f2fd;
-        }
-        footer {
-            background-color: #e3f2fd;
-            color: #2c3e50;
-            padding: 15px 0;
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products - Doc Lenon Veterinary</title>
+  <link rel="icon" href="img/LOGO.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+      body {
+          background-color: #f8f9fa;
+      }
+      .navbar {
+          background-color: #e3f2fd;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .product-card {
+          border: none;
+          border-radius: 12px;
+          overflow: hidden;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
+      .product-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      }
+      .product-card img {
+          height: 200px;
+          object-fit: cover;
+          width: 100%;
+      }
+      .card-body h5 {
+          color: #007bff;
+          font-weight: 600;
+      }
+      .filter-bar {
+          background: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          margin-bottom: 30px;
+      }
+      footer {
+          background-color: #e3f2fd;
+          color: #2c3e50;
+          padding: 15px 0;
+          text-align: center;
+          margin-top: 40px;
+      }
+  </style>
 </head>
 <body>
-    <!-- Header -->
+
+<!-- Navigation Bar -->
     <nav class="navbar" style="background-color: #e3f2fd;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
-                DOC LENON VETERINARY
-            </a>
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link" href="Index.php">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Services</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="pw.php">Pet Wellness</a></li>
-                        <li><a class="dropdown-item" href="Consultation.php">Consultation</a></li>
-                        <li><a class="dropdown-item" href="Vaccine.php">Vaccination</a></li>
-                        <li><a class="dropdown-item" href="deworming.php">Deworming</a></li>
-                        <li><a class="dropdown-item" href="laboratory.php">Laboratory</a></li>
-                        <li><a class="dropdown-item" href="Surgery.php">Surgery</a></li>
-                        <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
-                        <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
-                        <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
-                        
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="products.php">Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Contact Us.php">Contact Us</a>
-                </li>
-                <li>
-                    <button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button>
-                </li>
-            </ul>
-        </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
+          DOC LENON VETERINARY
+        </a>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link" href="index.php">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pw.php">Services Post</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="products.php">Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " aria-current="page" href="contact.php">Contact Us</a>
+          </li>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button>
+          </li>
+        </ul>
+      </div>
     </nav>
 
-    <!-- Products Section -->
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Our Products</h1>
-        <div class="row">
-            <?php if (!empty($products)): ?>
-                <?php foreach ($products as $product): ?>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <?php if (!empty($product['Image'])): ?>
-                                <img src="<?php echo htmlspecialchars($product['Image']); ?>" class="card-img-top" alt="Product Image">
-                            <?php else: ?>
-                                <img src="img/placeholder.jpg" class="card-img-top" alt="No Image">
-                            <?php endif; ?>
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($product['Product_Name']); ?></h5>
-                                <p class="card-text">Category: <?php echo htmlspecialchars($product['Category']); ?></p>
-                                <p class="card-text">Price: ₱<?php echo htmlspecialchars(number_format($product['Price'], 2)); ?></p>
-                                <p class="card-text">Stock: <?php echo htmlspecialchars($product['Stock']); ?></p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12">
-                    <p class="text-center">No products found.</p>
-                </div>
-            <?php endif; ?>
-        </div>
+<!-- Main Section -->
+<div class="container mt-5">
+  <h1 class="text-center mb-4 text-primary fw-bold">Our Products</h1>
+
+  <!-- Filter & Search -->
+  <div class="filter-bar d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <label for="categoryFilter" class="fw-semibold text-secondary">Category:</label>
+      <select id="categoryFilter" class="form-select w-auto">
+        <option value="all">All</option>
+        <?php foreach ($categories as $cat): ?>
+          <option value="<?php echo htmlspecialchars($cat); ?>"><?php echo htmlspecialchars($cat); ?></option>
+        <?php endforeach; ?>
+      </select>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; ALL RIGHTS RESERVED 2025 SE FINAL - TAHO</p>
-    </footer>
+    <div class="d-flex align-items-center gap-2">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search product name..." style="min-width:250px;">
+    </div>
+  </div>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- Product Cards -->
+  <div class="row" id="productGrid">
+    <?php if (!empty($products)): ?>
+      <?php foreach ($products as $product): ?>
+        <div class="col-md-4 mb-4 product-item" 
+             data-category="<?php echo strtolower($product['Category']); ?>" 
+             data-name="<?php echo strtolower($product['Product_Name']); ?>">
+          <div class="card product-card h-100">
+            <img src="<?php echo !empty($product['Image']) ? htmlspecialchars($product['Image']) : 'img/placeholder.jpg'; ?>" alt="Product Image">
+            <div class="card-body">
+              <h5 class="card-title"><?php echo htmlspecialchars($product['Product_Name']); ?></h5>
+              <p class="mb-1 text-muted"><strong>Category:</strong> <?php echo htmlspecialchars($product['Category']); ?></p>
+              <p class="mb-1"><strong>Price:</strong> ₱<?php echo number_format($product['Price'], 2); ?></p>
+              <p class="mb-1"><strong>Stock:</strong> <?php echo htmlspecialchars($product['Stock']); ?></p>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    <?php else: ?>
+      <div class="col-12 text-center">
+        <p>No products found.</p>
+      </div>
+    <?php endif; ?>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; ALL RIGHTS RESERVED 2025 SE FINAL - TAHO</p>
+</footer>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const categoryFilter = document.getElementById('categoryFilter');
+  const searchInput = document.getElementById('searchInput');
+  const products = document.querySelectorAll('.product-item');
+
+  function filterProducts() {
+    const category = categoryFilter.value.toLowerCase();
+    const search = searchInput.value.toLowerCase();
+
+    products.forEach(prod => {
+      const matchesCategory = (category === 'all' || prod.dataset.category === category);
+      const matchesSearch = prod.dataset.name.includes(search);
+      prod.style.display = (matchesCategory && matchesSearch) ? '' : 'none';
+    });
+  }
+
+  categoryFilter.addEventListener('change', filterProducts);
+  searchInput.addEventListener('keyup', filterProducts);
+});
+</script>
 </body>
 </html>

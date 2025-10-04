@@ -73,22 +73,8 @@
   <li class="nav-item">
     <a class="nav-link active" aria-current="page" href="#">Home</a>
   </li>
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Services</a>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item active" href="pw.php">Pet Wellness</a></li>
-                            <li><a class="dropdown-item" href="Consultation.php">Consultation</a></li>
-                            <li><a class="dropdown-item" href="Vaccine.php">Vaccination</a></li>
-                            <li><a class="dropdown-item" href="deworming.php">Deworming</a></li>
-                            <li><a class="dropdown-item" href="laboratory.php">Laboratory</a></li>
-                            <li><a class="dropdown-item" href="Surgery.php">Surgery</a></li>
-                            <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
-                            <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
-                            <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
-                            <li><a class="dropdown-item" href="Order-Products.php">Order Products</a></li>
-      <!--<li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="#">Separated link</a></li>-->
-    </ul>
+  <li class="nav-item">
+    <a class="nav-link" href="pw.php" href="#">Services Post</a>
   </li>
   <li class="nav-item">
     <a class="nav-link" href="products.php">Products</a>

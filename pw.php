@@ -15,11 +15,28 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+// ✅ Fixed list for filter dropdown (independent from navbar)
+$categories = [
+    'Pet Wellness',
+    'Consultation',
+    'Vaccination',
+    'Deworming',
+    'Laboratory',
+    'Surgery',
+    'Confinement',
+    'Grooming',
+    'Pet Boarding'
+];
 
-// Set the category we want to display
-$category = "Pet Wellness";
+// ✅ Get selected category (default: Pet Wellness)
+$category = isset($_GET['category']) ? $_GET['category'] : 'Pet Wellness';
 
-// Fetch posts from the database with the specified category
+// Validate the category — fallback if invalid
+if (!in_array($category, $categories)) {
+    $category = 'Pet Wellness';
+}
+
+// ✅ Fetch posts filtered by selected category
 $sql = "SELECT * FROM posts WHERE Category = ? ORDER BY Created_at DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $category);
@@ -27,49 +44,25 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $posts = [];
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $posts[] = $row;
-    }
+while ($row = $result->fetch_assoc()) {
+    $posts[] = $row;
 }
 
-// Get recent posts for sidebar (limited to 5)
-$sql_recent = "SELECT ID, Title, Created_at FROM posts ORDER BY Created_at DESC LIMIT 5";
-$result_recent = $conn->query($sql_recent);
-$recent_posts = [];
-if ($result_recent && $result_recent->num_rows > 0) {
-    while ($row = $result_recent->fetch_assoc()) {
-        $recent_posts[] = $row;
-    }
-}
-
-// Get all categories for sidebar
-$sql_categories = "SELECT DISTINCT Category, COUNT(*) as count FROM posts GROUP BY Category ORDER BY Category";
-$result_categories = $conn->query($sql_categories);
-$categories = [];
-if ($result_categories && $result_categories->num_rows > 0) {
-    while ($row = $result_categories->fetch_assoc()) {
-        $categories[] = $row;
-    }
-}
-
-// Get full post content if an ID is provided via AJAX
-if(isset($_GET['get_content']) && isset($_GET['id'])) {
-    $post_id = $_GET['id'];
+// ✅ Handle AJAX request (for Read More modal)
+if (isset($_GET['get_content']) && isset($_GET['id'])) {
+    $post_id = (int)$_GET['id'];
     $sql = "SELECT Title, Content, Image, Created_at FROM posts WHERE ID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $post_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    if($result && $result->num_rows > 0) {
-        $post = $result->fetch_assoc();
-        echo json_encode($post);
-        exit;
+
+    if ($result && $result->num_rows > 0) {
+        echo json_encode($result->fetch_assoc());
     } else {
         echo json_encode(["error" => "Content not found"]);
-        exit;
     }
+    exit;
 }
 ?>
 
@@ -409,59 +402,55 @@ if(isset($_GET['get_content']) && isset($_GET['id'])) {
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
-                DOC LENON VETERINARY
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Services</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item active" href="pw.php">Pet Wellness</a></li>
-                            <li><a class="dropdown-item" href="Consultation.php">Consultation</a></li>
-                            <li><a class="dropdown-item" href="Vaccine.php">Vaccination</a></li>
-                            <li><a class="dropdown-item" href="deworming.php">Deworming</a></li>
-                            <li><a class="dropdown-item" href="laboratory.php">Laboratory</a></li>
-                            <li><a class="dropdown-item" href="Surgery.php">Surgery</a></li>
-                            <li><a class="dropdown-item" href="Confinement.php">Confinement</a></li>
-                            <li><a class="dropdown-item" href="Grooming.php">Grooming</a></li>
-                            <li><a class="dropdown-item" href="Pet-Boarding.php">Pet Boarding</a></li>
-                            <li><a class="dropdown-item" href="Order-Products.php">Order Products</a></li>
-                           
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="products.php">Products</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="Contact Us.php">Contact Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="Appointment.php">Book Appointment</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <!-- Navigation Bar -->
+    <nav class="navbar" style="background-color: #e3f2fd;">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
+          DOC LENON VETERINARY
+        </a>
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link" href="index.php">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="pw.php">Services Post</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="products.php">Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " aria-current="page" href="contact.php">Contact Us</a>
+          </li>
+            <button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button>
+          </li>
+        </ul>
+      </div>
     </nav>
     <div class="container">
         <!-- Posts Section -->
+         <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0"><?php echo htmlspecialchars($category); ?> Posts</h2>
+    
+    <form method="get" class="d-flex align-items-center">
+    <label for="category" class="me-2 fw-semibold">Filter by Service:</label>
+    <select name="category" id="category" class="form-select" onchange="this.form.submit()" style="width: 220px;">
+        <?php foreach ($categories as $cat): ?>
+            <option value="<?php echo htmlspecialchars($cat); ?>" 
+                <?php echo ($cat === $category) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($cat); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</form>
+</div>
+
         <div class="row">
+            
             <?php if (count($posts) > 0): ?>
                 <?php foreach ($posts as $post): ?>
                     <div class="col-12 mb-5">
+                        
                         <div class="post-item">
                             <!-- Image container - Now separate and full width -->
                             <div class="post-image-container">
@@ -584,7 +573,7 @@ if(isset($_GET['get_content']) && isset($_GET['id'])) {
                 
                 // Ajax request to get the content
                 $.ajax({
-                    url: 'pw.php',
+                    url: window.location.pathname,
                     method: 'GET',
                     dataType: 'json',
                     data: {
@@ -657,6 +646,8 @@ if(isset($_GET['get_content']) && isset($_GET['id'])) {
                 }
             });
         });
+
+        
     </script>
 </body>
 </html>

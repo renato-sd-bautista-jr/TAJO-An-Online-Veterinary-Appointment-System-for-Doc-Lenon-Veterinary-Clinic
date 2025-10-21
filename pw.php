@@ -344,11 +344,19 @@ if (isset($_GET['get_content']) && isset($_GET['id'])) {
         }
         
         .modal-content-text {
+            white-space: pre-wrap; /* Keeps line breaks from text */
             font-size: 1.15rem;
             line-height: 1.8;
             color: #333;
         }
-        
+        .modal-content-text ol {
+            margin-left: 1.5rem;
+            list-style: disc;
+        }
+        .modal-content-text li {
+            margin-bottom: 0.5rem;
+        }
+        .modal-content-text ul, 
         .loading-spinner {
             display: none;
             position: fixed;

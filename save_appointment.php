@@ -1,10 +1,16 @@
 <?php
-// Start session for admin authentication
 session_start();
+
+// Include PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    // Return error if not authorized
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => 'Not authorized']);
     exit;
@@ -12,14 +18,11 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 // Database connection
 $servername = "localhost";
-$username = "root"; // Change to your database username
-$password = ""; // Change to your database password
-$dbname = "taho"; // Change to your database name
+$username = "root";
+$password = "";
+$dbname = "taho";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
 if ($conn->connect_error) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => 'Database connection failed: ' . $conn->connect_error]);
@@ -33,20 +36,78 @@ if (!isset($_POST['id']) || empty($_POST['id'])) {
     exit;
 }
 
-// Sanitize input
-$id = $conn->real_escape_string($_POST['id']);
+$id = intval($_POST['id']);
 
-// Update appointment status to "Confirmed"
+// 1. Get appointment details including owner email
+$stmt = $conn->prepare("SELECT appointment_date, appointment_time, owner_name, owner_email, pet_name, service_type FROM appointments WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$apt = $result->fetch_assoc();
+$stmt->close();
 
-$sql = "UPDATE appointments SET status = 'Confirmed' WHERE id = $id";
-
-if ($conn->query($sql) === TRUE) {
+if (!$apt) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => true]);
-} else {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Error updating status: ' . $conn->error]);
+    echo json_encode(['success' => false, 'error' => 'Appointment not found']);
+    exit;
 }
+
+$date = $apt['appointment_date'];
+$time = $apt['appointment_time'];
+$ownerName = $apt['owner_name'];
+$ownerEmail = $apt['owner_email'];
+$petName = $apt['pet_name'];
+$service = $apt['service_type'];
+
+// 2. Confirm this appointment
+$stmt = $conn->prepare("UPDATE appointments SET status = 'Confirmed' WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$stmt->close();
+
+// 3. Cancel other appointments at same date/time
+$stmt = $conn->prepare("UPDATE appointments SET status = 'Cancelled' WHERE appointment_date = ? AND appointment_time = ? AND id != ?");
+$stmt->bind_param("ssi", $date, $time, $id);
+$stmt->execute();
+$stmt->close();
+
+// 4. Send email notification to owner using PHPMailer
+$mail = new PHPMailer(true);
+
+try {
+    //Server settings
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com'; // Change to your SMTP server
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'yourgmail@gmail.com'; // SMTP username
+    $mail->Password   = 'your_app_password';    // SMTP password / app password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    //Recipients
+    $mail->setFrom('no-reply@yourclinic.com', 'Doc Lenon Veterinary Clinic');
+    $mail->addAddress($ownerEmail, $ownerName);
+
+    // Content
+    $mail->isHTML(false);
+    $mail->Subject = "Your Appointment is Confirmed!";
+    $mail->Body    = "Hello $ownerName,
+
+Your appointment for $petName ($service) on $date at $time has been confirmed.
+
+Thank you for choosing our clinic.
+
+- Doc Lenon Veterinary Clinic";
+
+    $mail->send();
+} catch (Exception $e) {
+    // Optional: log error
+    error_log("Mailer Error: " . $mail->ErrorInfo);
+}
+
+// Return success response
+header('Content-Type: application/json');
+echo json_encode(['success' => true]);
 
 $conn->close();
 ?>

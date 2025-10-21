@@ -30,25 +30,27 @@ if (isset($_POST['add_appointment'])) {
     // Basic validation
     if (!empty($appointment_date) && !empty($appointment_time) && !empty($owner_name)) {
         $query = "INSERT INTO appointments 
-            (appointment_date, appointment_time, pet_name, pet_type, owner_name, owner_phone, service_type, notes, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
+        (appointment_date, appointment_time, pet_name, pet_type, owner_name, owner_phone, owner_email, service_type, notes, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
 
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssssssss", 
-            $appointment_date, 
-            $appointment_time, 
-            $pet_name, 
-            $pet_type, 
-            $owner_name, 
-            $owner_phone, 
-            $service_type, 
+       $stmt->bind_param(
+            "sssssssss",  // 9 s's for 9 variables
+            $appointment_date,
+            $appointment_time,
+            $pet_name,
+            $pet_type,
+            $owner_name,
+            $owner_phone,
+            $owner_email, // NEW variable
+            $service_type,
             $notes
         );
 
         if ($stmt->execute()) {
             echo "<script>
                 alert('Appointment successfully scheduled!');
-                window.location.href = 'appointments.php';
+                window.location.href = 'appointment.php';
             </script>";
         } else {
             echo "<script>alert('Error: Could not save appointment.');</script>";
@@ -59,6 +61,16 @@ if (isset($_POST['add_appointment'])) {
         echo "<script>alert('Please fill all required fields.');</script>";
     }
 }
+
+$check = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE appointment_date=? AND appointment_time=? AND status='Confirmed'");
+$check->bind_param("ss", $appointment_date, $appointment_time);
+$check->execute();
+$result = $check->get_result()->fetch_assoc();
+if ($result['count'] > 0) {
+    echo "<script>alert('This time slot is already booked. Please choose another time.');</script>";
+    exit;
+}
+$check->close();
 ?>
 
 <!DOCTYPE html>
@@ -110,9 +122,10 @@ if (isset($_POST['add_appointment'])) {
         }
 
         .time-slot.disabled {
-            background-color: #e9ecef;
-            color: #adb5bd;
-            cursor: not-allowed;
+            background-color: #e9ecef !important;
+            color: #adb5bd !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -159,13 +172,13 @@ if (isset($_POST['add_appointment'])) {
                                 <div class="mb-3">
                                     <label class="form-label">Available Time Slots</label>
                                     <div class="d-flex flex-wrap gap-2" id="timeSlotContainer">
-                                        <div class="time-slot" data-time="9:00 AM">9:00 AM</div>
-                                        <div class="time-slot" data-time="10:00 AM">10:00 AM</div>
-                                        <div class="time-slot" data-time="11:00 AM">11:00 AM</div>
-                                        <div class="time-slot" data-time="1:00 PM">1:00 PM</div>
-                                        <div class="time-slot" data-time="2:00 PM">2:00 PM</div>
-                                        <div class="time-slot" data-time="3:00 PM">3:00 PM</div>
-                                        <div class="time-slot" data-time="4:00 PM">4:00 PM</div>
+                                        <div class="time-slot" data-time="9:00 AM">8:00 AM - 9:00 AM</div>
+                                        <div class="time-slot" data-time="10:00 AM">9:00 AM - 10:00 AM</div>
+                                        <div class="time-slot" data-time="11:00 AM">10:00 AM - 11:00 PM</div>
+                                        <div class="time-slot" data-time="1:00 PM">11:00 PM - 12:00 PM</div>
+                                        <div class="time-slot" data-time="2:00 PM">1:00 PM - 2:00 PM</div>
+                                        <div class="time-slot" data-time="3:00 PM">2:00 PM - 3:00 PM</div>
+                                        <div class="time-slot" data-time="4:00 PM">3:00 PM - 4:00 PM</div>
                                     </div>
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>
@@ -211,6 +224,10 @@ if (isset($_POST['add_appointment'])) {
                                     <label for="owner_phone" class="form-label">Owner Phone</label>
                                     <input type="tel" class="form-control" id="owner_phone" name="owner_phone" required pattern="[0-9]{10,15}" placeholder="09123456789">
                                 </div>
+                                <div class="mb-3">
+                                    <label for="owner_email" class="form-label">Owner Email</label>
+                                    <input type="email" class="form-control" id="owner_email" name="owner_email" required placeholder="example@gmail.com">
+                                </div>
                             </div>
 
                             <div class="col-12">
@@ -232,42 +249,81 @@ if (isset($_POST['add_appointment'])) {
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Disable past dates
-        const dateInput = document.getElementById('appointment_date');
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.setAttribute('min', today);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const dateInput = document.getElementById('appointment_date');
+    const today = new Date();
 
-        // Time slot selection
-        const slots = document.querySelectorAll('.time-slot');
-        const timeInput = document.getElementById('appointment_time');
+    // Format YYYY-MM-DD for input date
+    const formatDate = (date) => date.toISOString().split('T')[0];
+
+    // Set min date = today, max date = today + 1 month
+    const minDate = formatDate(today);
+    const maxDate = formatDate(new Date(today.getFullYear(), today.getMonth() + 1, today.getDate()));
+
+    dateInput.setAttribute('min', minDate);
+    dateInput.setAttribute('max', maxDate);
+    dateInput.value = minDate; // Default to today
+
+    const slots = document.querySelectorAll('.time-slot');
+    const timeInput = document.getElementById('appointment_time');
+
+    function updateDisabledSlots() {
+        const selectedDate = new Date(dateInput.value);
+        const isToday = selectedDate.toDateString() === today.toDateString();
 
         slots.forEach(slot => {
-            slot.addEventListener('click', function() {
-                if (slot.classList.contains('disabled')) return;
+            slot.classList.remove('disabled');
+            const slotTime = slot.dataset.time;
 
-                slots.forEach(s => s.classList.remove('selected'));
-                this.classList.add('selected');
-                timeInput.value = this.dataset.time;
-            });
+            if (isToday) {
+                const [hour, minutePart] = slotTime.split(':');
+                const hourNum = parseInt(hour);
+                const isPM = slotTime.includes('PM');
+                let slotHour24 = isPM ? (hourNum === 12 ? 12 : hourNum + 12) : (hourNum === 12 ? 0 : hourNum);
+
+                const slotDateTime = new Date(today);
+                slotDateTime.setHours(slotHour24, 0, 0, 0);
+
+                // If slot time has already passed, disable it
+                if (slotDateTime < today) {
+                    slot.classList.add('disabled');
+                    slot.classList.remove('selected');
+                }
+            }
         });
+    }
 
-        // Character counter for notes
-        const notes = document.getElementById('notes');
-        const charCount = document.getElementById('charCount');
-        notes.addEventListener('input', () => {
-            const len = notes.value.length;
-            charCount.textContent = `${len} / 300`;
-            charCount.style.color = len > 250 ? '#dc3545' : '#6c757d';
+    // Initial update for current time
+    updateDisabledSlots();
+
+    // Recalculate available times when date changes
+    dateInput.addEventListener('change', () => {
+        slots.forEach(s => s.classList.remove('selected'));
+        timeInput.value = '';
+        updateDisabledSlots();
+    });
+
+    // Handle selecting time slots
+    slots.forEach(slot => {
+        slot.addEventListener('click', function() {
+            if (slot.classList.contains('disabled')) return;
+
+            slots.forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+            timeInput.value = this.dataset.time;
         });
+    });
 
-        function selectTimeSlot(element) {
-    document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
-    element.classList.add('selected');
-    document.getElementById('appointment_time').value = element.dataset.time;
-}
-    </script>
+    // Character counter for notes
+    const notes = document.getElementById('notes');
+    const charCount = document.getElementById('charCount');
+    notes.addEventListener('input', () => {
+        const len = notes.value.length;
+        charCount.textContent = `${len} / 300`;
+        charCount.style.color = len > 250 ? '#dc3545' : '#6c757d';
+    });
+</script>
+
 </body>
 </html>

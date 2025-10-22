@@ -1,9 +1,14 @@
 <?php
 session_start();
-
-// DB connection
+// DB connecton
 $conn = new mysqli("localhost","root","","taho");
 if ($conn->connect_error) die("Connection failed: ".$conn->connect_error);
+include 'notiffunction.php';
+include 'notificationmodal.php';
+// Fetch unread count for notification bell
+$unread_count = getUnreadCount($conn);
+
+
 
 // Admin auth
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -50,26 +55,154 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 <style>
 /* reuse your styles */
-body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
-.admin-header{background:#4DA6FF;color:white;padding:15px;margin-bottom:30px;border-radius:5px;display:flex;justify-content:space-between;align-items:center;}
-.card{border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);margin-bottom:30px;}
-.card-header{background:#4DA6FF;color:white;font-weight:bold;}
-.btn-primary{background:#4DA6FF;border-color:#4DA6FF;}
-.btn-primary:hover{background:#3a8fd0;border-color:#3a8fd0;}
-.paw-logo{color:#4DA6FF;margin-right:10px;}
-.sidebar{height:100%;width:0;position:fixed;z-index:1000;top:0;left:0;background:#222;overflow-x:hidden;transition:0.5s;padding-top:60px;box-shadow:2px 0 5px rgba(0,0,0,0.2);}
-.sidebar a{padding:12px 15px;text-decoration:none;font-size:18px;color:#fff;display:block;transition:0.3s;border-left:3px solid transparent;}
-.sidebar a:hover{background:#333;border-left:3px solid #4DA6FF;}
-.sidebar a.active{background:#2c2c2c;border-left:3px solid #4DA6FF;font-weight:bold;}
-.sidebar .close-btn{position:absolute;top:10px;right:15px;font-size:30px;}
-.main-content{transition:margin-left .5s;padding:16px;}
-.burger-menu{font-size:24px;cursor:pointer;color:white;margin-right:15px;}
-.stats-card{border-left:4px solid;background:white;padding:15px;margin-bottom:15px;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
-.stats-card-pending{border-left-color:#ffc107;}
-.stats-card-accepted{border-left-color:#198754;}
-.stats-card-rejected{border-left-color:#dc3545;}
-.stats-number{font-size:1.5rem;font-weight:bold;}
-.stats-title{font-size:.9rem;color:#6c757d;text-transform:uppercase;}
+body {
+  background: #f8f9fa;
+  padding-top: 20px;
+  overflow-x: hidden;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  color: #212529;
+}
+
+/* Header */
+.admin-header {
+  background: #4DA6FF;
+  color: white;
+  padding: 15px 25px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.burger-menu {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  margin-right: 15px;
+}
+
+.paw-logo {
+  color: white;
+  margin-right: 10px;
+}
+
+/* Cards */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  background: white;
+}
+
+.card-header {
+  background: #4DA6FF;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #4DA6FF;
+  border-color: #4DA6FF;
+}
+.btn-primary:hover {
+  background: #3a8fd0;
+  border-color: #3a8fd0;
+}
+
+/* Sidebar */
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background: #222;
+  overflow-x: hidden;
+  transition: width 0.4s ease;
+  padding-top: 60px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+}
+.sidebar-header {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  font-size: 22px;
+  color: #4DA6FF;
+  font-weight: 600;
+}
+.sidebar a {
+  padding: 12px 18px;
+  text-decoration: none;
+  font-size: 18px;
+  color: #ddd;
+  display: block;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+.sidebar a:hover {
+  background: #333;
+  border-left: 3px solid #4DA6FF;
+  color: #fff;
+}
+.sidebar a.active {
+  background: #2c2c2c;
+  border-left: 3px solid #4DA6FF;
+  color: #fff;
+  font-weight: 600;
+}
+.sidebar .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 30px;
+  color: #aaa;
+  transition: 0.3s;
+}
+.sidebar .close-btn:hover {
+  color: #fff;
+}
+
+/* Main content transition */
+.main-content {
+  transition: margin-left 0.4s ease;
+  padding: 16px;
+}
+
+/* Stats Cards */
+.stats-card {
+  border-left: 4px solid;
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.stats-card-pending { border-left-color: #ffc107; }
+.stats-card-accepted { border-left-color: #198754; }
+.stats-card-rejected { border-left-color: #dc3545; }
+
+.stats-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.stats-title {
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+/* Notification badge */
+.badge.bg-danger {
+  background: #dc3545 !important;
+  font-size: 0.7rem;
+  padding: 4px 6px;
+  border-radius: 10px;
+}
+
 </style>
 </head>
 <body>
@@ -85,7 +218,7 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
         <a href="post.php" >
             <i class="fas fa-blog"></i> Post Management
         </a>
-        <a href="calendar.php"class="active">
+        <a href="calendar.php">
             <i class="fas fa-calendar-alt"></i> Appointment Calendar
         </a>
         <a href="history1.php">
@@ -104,16 +237,24 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
 
 
 <div id="main" class="main-content">
-  <div class="admin-header">
-    <div class="d-flex align-items-center">
-      <span class="burger-menu" onclick="openNav()"><i class="fas fa-bars"></i></span>
-      <h2><i class="fas fa-paw paw-logo"></i> Order Management</h2>
-    </div>
-    <div>
-      <span class="text-light me-3">Welcome, Admin</span>
-      <a href="?logout=1" class="btn btn-light btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
+ <div class="admin-header">
+  <div class="d-flex align-items-center">
+    <span class="burger-menu" onclick="openNav()"><i class="fas fa-bars"></i></span>
+    <h2><i class="fas fa-paw paw-logo"></i> Order Management</h2>
   </div>
+  <div class="d-flex align-items-center">
+    <button id="notifBtn" class="btn btn-light position-relative me-3">
+  <i class="fas fa-bell text-primary"></i>
+  <?php if ($unread_count > 0): ?>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      <?= $unread_count ?>
+    </span>
+  <?php endif; ?>
+  </button>
+    <span class="text-light me-3">Welcome, Admin</span>
+    <a href="?logout=1" class="btn btn-light btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
 
 <div class="container">
   <div class="row mb-4">
@@ -167,11 +308,44 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
     <?php else: ?>
       <span class="text-muted">No items</span>
     <?php endif; ?>
-    <?php if($order['status']=='Pending'): ?>
-      <button class="btn btn-sm btn-success accept-btn" data-id="<?= $order['id'] ?>"><i class="fas fa-check"></i></button>
-      <button class="btn btn-sm btn-danger reject-btn" data-id="<?= $order['id'] ?>"><i class="fas fa-times"></i></button>
-    <?php endif; ?>
-  </td>
+   <td>
+    <button class="btn btn-sm btn-outline-primary view-receipt-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-receipt"></i> View Receipt
+    </button>
+  <?php
+  $status = $order['status'];
+
+  if ($status == 'Pending'): ?>
+    <button class="btn btn-sm btn-success accept-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-check"></i>
+    </button>
+    <button class="btn btn-sm btn-danger reject-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-times"></i>
+    </button>
+    
+
+  <?php elseif ($status == 'Accepted'): ?>
+    <button class="btn btn-sm btn-warning mark-paid-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-coins"></i> Mark as Paid
+    </button>
+
+  <?php elseif ($status == 'Paid'): ?>
+    <button class="btn btn-sm btn-info to-claim-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-box-open"></i> Set To Claim
+    </button>
+
+  <?php elseif ($status == 'To Claim'): ?>
+    <button class="btn btn-sm btn-success complete-btn" data-id="<?= $order['id'] ?>">
+      <i class="fas fa-check-circle"></i> Complete
+    </button>
+
+  <?php else: ?>
+    <span class="text-muted small">No actions available</span>
+  <?php endif; ?>
+</td>
+
+
+
 </tr>
 <?php endforeach; ?>
           </tbody>
@@ -192,6 +366,23 @@ body{background:#f8f9fa;padding-top:20px;overflow-x:hidden;}
     </div>
   </div>
 </div>
+
+
+<!-- ================= Receipt Modal (Put This at the Bottom) ================= -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Order Receipt</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="receiptContent">
+        <p class="text-center text-muted mb-0">Loading receipt...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -216,6 +407,27 @@ $(function(){
       });
     }
   });
+  $('.mark-paid-btn').click(function(){
+  let id = $(this).data('id');
+  $.post('update_order_status.php',{id:id,status:'Paid'},function(){
+    location.reload();
+  });
+});
+
+$('.to-claim-btn').click(function(){
+  let id = $(this).data('id');
+  $.post('update_order_status.php',{id:id,status:'To Claim'},function(){
+    location.reload();
+  });
+});
+
+$('.complete-btn').click(function(){
+  let id = $(this).data('id');
+  $.post('update_order_status.php',{id:id,status:'Completed'},function(){
+    location.reload();
+  });
+});
+
 });
 
 function openNav(){document.getElementById("mySidebar").style.width="250px";document.getElementById("main").style.marginLeft="250px";}
@@ -229,6 +441,37 @@ $('.view-items').click(function(){
   });
 });
 
+
+$('#notifBtn').click(function(){
+  // If modal not loaded yet, load it via AJAX
+  if (!$('#notificationModal').length) {
+    $.get('notificationmodal.php', function(data){
+      $('body').append(data); // Add modal to DOM
+      const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+      modal.show();
+    });
+  } else {
+    const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+    modal.show();
+  }
+});
+
+$(document).ready(function(){
+ $(document).on('click', '.view-receipt-btn', function(){
+  let id = $(this).data('id');
+  $('#receiptContent').html('<p class="text-center text-muted">Loading receipt...</p>');
+$('#receiptContent').load('receipt.php?id=' + id, function(response, status, xhr) {
+   if (status == "error") {
+    $('#receiptContent').html("<p class='text-danger text-center'>Error loading receipt.</p>");
+    console.error("Error loading receipt:", xhr.statusText);
+  } else {
+    new bootstrap.Modal(document.getElementById('receiptModal')).show();
+  }
+  });
+});
+});
 </script>
+
+
 </body>
 </html>

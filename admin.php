@@ -407,19 +407,21 @@ if ($page == 'products') {
     <!-- Main Content -->
     <div id="main" class="main-content">
         <div class="admin-header">
-            <div class="d-flex align-items-center">
-                <span class="burger-menu" onclick="openNav()">
-                    <i class="fas fa-bars"></i>
-                </span>
-                <h2><i class="fas fa-paw paw-logo"></i> Doc Lenon Veterinary</h2>
-            </div>
-            <div>
-                <span class="text-light me-3">Welcome, Admin</span>
-                <a href="?logout=1" class="btn btn-light btn-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
+  <div class="d-flex align-items-center">
+    <span class="burger-menu" onclick="openNav()"><i class="fas fa-bars"></i></span>
+    <h2><i class="fas fa-paw paw-logo"></i> Order Management</h2>
+  </div>
+  <div class="d-flex align-items-center">
+    <button id="notifBtn" class="btn btn-light position-relative me-3" data-bs-toggle="modal" data-bs-target="#notificationModal">
+      <i class="fas fa-bell text-primary"></i>
+      <?php if ($unread_count > 0): ?>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?= $unread_count ?></span>
+      <?php endif; ?>
+    </button>
+    <span class="text-light me-3">Welcome, Admin</span>
+    <a href="?logout=1" class="btn btn-light btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
         
         <div class="container">
             <?php if (isset($message)): ?>

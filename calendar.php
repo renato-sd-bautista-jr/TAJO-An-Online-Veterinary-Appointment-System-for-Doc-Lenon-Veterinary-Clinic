@@ -805,16 +805,16 @@ if ($cancelledCount > 0) {
                                     <input type="date" class="form-control" id="appointment_date" name="appointment_date" requiredmin="<?php echo date('Y-m-d'); ?>">
                                 </div>
                                 
-                                <div class="mb-3">
+                                  <div class="mb-3">
                                     <label class="form-label">Available Time Slots</label>
                                     <div class="d-flex flex-wrap gap-2" id="timeSlotContainer">
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">8:00AM - 9:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">9:00AM - 10:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">10:00AM - 11:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="1:00 PM">11:00AM - 12:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="2:00 PM">1:00PM - 2:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="3:00 PM">2:00PM - 3:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="4:00 PM">3:00AM - 4:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">9:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">10:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">11:00 AM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="13:00 PM">13:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="14:00 PM">14:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="15:00 PM">15:00 PM</div>
+                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="16:00 PM">16:00 PM</div>
                                     </div>
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>

@@ -97,7 +97,8 @@ if (isset($_GET['check_slots'])) {
 if (isset($_POST['add_appointment'])) {
     // Sanitize and retrieve form data
     $appointment_date = $conn->real_escape_string($_POST['appointment_date']);
-    $appointment_time = $conn->real_escape_string($_POST['appointment_time']);
+    $appointment_time = date("H:i:s", strtotime($_POST['appointment_time']));
+
     $pet_name = $conn->real_escape_string($_POST['pet_name']);
     $pet_type = $conn->real_escape_string($_POST['pet_type']);
     $owner_name = $conn->real_escape_string($_POST['owner_name']);
@@ -113,10 +114,12 @@ if (isset($_POST['add_appointment'])) {
             VALUES ('$appointment_date', '$appointment_time', '$pet_name', '$pet_type', '$owner_name', '$owner_phone', '$service_type', '$notes', '$status')";
 
     if ($conn->query($sql) === TRUE) {
-        $message = "Appointment successfully scheduled!";
-    } else {
-        $message = "Error: " . $conn->error;
-    }
+    header("Location: calendar.php?success=added");
+    exit;
+} else {
+    header("Location: calendar.php?error=" . urlencode($conn->error));
+    exit;
+}
 }
 $appointments = [];
 $sql = "SELECT appointment_date, appointment_time, pet_name, service_type FROM appointments";
@@ -181,7 +184,7 @@ if (isset($_POST['update_appointment'])) {
     
     // Convert to 24-hour format for DB
     $appointment_time_12h = $_POST['appointment_time']; // e.g. "3:00 PM"
-    $appointment_time = date("H:i:s", strtotime($appointment_time_12h)); // -> "15:00:00"
+   $appointment_time = date("H:i:s", strtotime($_POST['appointment_time']));
 
     $pet_name = $conn->real_escape_string($_POST['pet_name']);
     $pet_type = $conn->real_escape_string($_POST['pet_type']);
@@ -203,10 +206,12 @@ if (isset($_POST['update_appointment'])) {
             WHERE id = $appointment_id";
 
     if ($conn->query($sql) === TRUE) {
-        $message = "Appointment successfully updated!";
-    } else {
-        $message = "Error updating appointment: " . $conn->error;
-    }
+    header("Location: calendar.php?success=updated");
+    exit;
+} else {
+    header("Location: calendar.php?error=" . urlencode($conn->error));
+    exit;
+}
 }
 
 
@@ -218,10 +223,12 @@ if (isset($_GET['delete_appointment'])) {
     $sql = "DELETE FROM appointments WHERE id = $appointment_id";
     
     if ($conn->query($sql) === TRUE) {
-        $message = "Appointment successfully deleted!";
-    } else {
-        $message = "Error deleting appointment: " . $conn->error;
-    }
+    header("Location: calendar.php?success=deleted");
+    exit;
+} else {
+    header("Location: calendar.php?error=" . urlencode($conn->error));
+    exit;
+}
 }
 
 // Add this endpoint to get appointment data for editing
@@ -268,18 +275,44 @@ function autoCancelPastAppointments($conn) {
     return $stmt->affected_rows; // Return number of affected rows
 }
 
-// Call this function after database connection and before any HTML output
-$cancelledCount = autoCancelPastAppointments($conn);
+
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Auto-cancel past appointments
-$cancelledCount = autoCancelPastAppointments($conn);
-if ($cancelledCount > 0) {
-    $message = "$cancelledCount past appointment(s) automatically marked as cancelled.";
+
+if (isset($_GET['success'])): ?>
+<div class="alert alert-success">
+    Appointment successfully <?php echo htmlspecialchars($_GET['success']); ?>!
+</div>
+<?php endif; 
+
+
+if (isset($_GET['get_all_appointments'])) {
+    $appointmentsData = [];
+    $sql = "SELECT id, appointment_date, appointment_time, pet_name, owner_name, service_type, status 
+            FROM appointments 
+            ORDER BY appointment_date, appointment_time";
+    $result = $conn->query($sql);
+    while ($row = $result->fetch_assoc()) {
+        $appointmentsData[] = [
+            'id' => $row['id'],
+            'date' => $row['appointment_date'],
+            'time' => date('g:i A', strtotime($row['appointment_time'])),
+            'pet_name' => $row['pet_name'],
+            'owner' => $row['owner_name'],
+            'service' => $row['service_type'],
+            'status' => $row['status']
+        ];
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['appointments' => $appointmentsData]);
+    exit;
 }
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -807,15 +840,14 @@ if ($cancelledCount > 0) {
                                 
                                   <div class="mb-3">
                                     <label class="form-label">Available Time Slots</label>
-                                    <div class="d-flex flex-wrap gap-2" id="timeSlotContainer">
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="9:00 AM">9:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">10:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">11:00 AM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="13:00 PM">13:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="14:00 PM">14:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="15:00 PM">15:00 PM</div>
-                                            <div class="time-slot" onclick="selectTimeSlot(this)" data-time="16:00 PM">16:00 PM</div>
-                                    </div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="09:00 AM">8 - 9 AM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="10:00 AM">9 - 10 AM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="11:00 AM">10 - 11 AM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="01:00 PM">1 - 2 PM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="02:00 PM">2 - 3 PM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="03:00 PM">3 - 4 PM</div>
+                                    <div class="time-slot" onclick="selectTimeSlot(this)" data-time="04:00 PM">4 - 5 PM</div>
+
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>
                                 
@@ -904,7 +936,13 @@ if ($cancelledCount > 0) {
             const dateInput = document.getElementById('appointment_date');
             const today = new Date().toISOString().split('T')[0];
             dateInput.setAttribute('min', today);
-            
+
+            // Limit appointment selection to 1 month ahead
+            const oneMonthLater = new Date();
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+            const maxDate = oneMonthLater.toISOString().split('T')[0];
+            dateInput.setAttribute('max', maxDate);
+                        
             // Add event listener for date changes
             dateInput.addEventListener('change', function() {
                 checkBookedTimeSlots(this.value);
@@ -1027,24 +1065,15 @@ if ($cancelledCount > 0) {
             return hours;
         }
         
-        // Modified selectTimeSlot function
-        function selectTimeSlot(element) {
-            // Don't select if disabled
-            if (element.classList.contains('disabled')) {
-                return;
-            }
-            
-            // Remove "selected" class from all time slots
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
+    function selectTimeSlot(element) {
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.remove('selected');
+        });
+        element.classList.add('selected');
 
-            // Add "selected" class to the clicked one
-            element.classList.add('selected');
-
-            // Set the hidden input value
-            document.getElementById('appointment_time').value = element.textContent.trim();
-        }
+        // Set input to data-time (not inner text)
+        document.getElementById('appointment_time').value = element.getAttribute('data-time');
+    }
 
         // Function to open modal in "Add" mode
         // Updated addAppointment function
@@ -1136,6 +1165,8 @@ if ($cancelledCount > 0) {
                     console.error('Error fetching appointment data:', error);
                     alert('Failed to load appointment data. Please try again.');
                 });
+
+             refreshAppointmentsList();
         }
 
         // Helper function to close all open modals
@@ -1158,6 +1189,8 @@ if ($cancelledCount > 0) {
             if (confirm('Are you sure you want to delete this appointment?')) {
                 window.location.href = 'calendar.php?delete_appointment=' + id;
             }
+
+             refreshAppointmentsList();
         }
 
         // Updated function to show appointments for a specific day
@@ -1217,11 +1250,27 @@ if ($cancelledCount > 0) {
             // Add button to create new appointment on this date
             const addButton = document.createElement('div');
             addButton.className = 'text-center mt-3';
-            addButton.innerHTML = `
-                <button class="btn btn-primary" onclick="addAppointment('${date}')">
-                    <i class="fas fa-plus"></i> Add Appointment on This Day
-                </button>
-            `;
+            const selectedDate = new Date(date);
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const maxAllowed = new Date();
+            maxAllowed.setMonth(maxAllowed.getMonth() + 1);
+            maxAllowed.setHours(0, 0, 0, 0);
+
+            // Only show "Add Appointment" if date is between today and one month later
+            if (selectedDate >= now && selectedDate <= maxAllowed) {
+                addButton.innerHTML = `
+                    <button class="btn btn-primary" onclick="addAppointment('${date}')">
+                        <i class="fas fa-plus"></i> Add Appointment on This Day
+                    </button>
+                `;
+            } else {
+                addButton.innerHTML = `
+                    <p class="text-muted mt-3">Appointments can only be scheduled from ${now.toLocaleDateString()} to ${maxAllowed.toLocaleDateString()}.</p>
+                `;
+            }
+
             appointmentsList.appendChild(addButton);
             
             // Open the modal
@@ -1276,6 +1325,7 @@ if ($cancelledCount > 0) {
                     setTimeout(() => {
                         alertDiv.remove();
                     }, 3000);
+                     reloadAppointmentsList();
                 } else {
                     alert('Failed to confirm appointment: ' + data.error);
                 }
@@ -1284,7 +1334,20 @@ if ($cancelledCount > 0) {
                 console.error('Error:', error);
                 alert('An error occurred while confirming the appointment.');
             });
+
+           
+             
         }
+
+        // 🔁 Reload appointments list dynamically
+function reloadAppointmentsList() {
+    fetch('appointments_list.php')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('appointmentsList').innerHTML = html;
+        })
+        .catch(error => console.error('Error reloading appointments:', error));
+}
            // Function to select a time slot         
         function selectTimeSlot(slot) {
             // Deselect all time slots
@@ -1296,22 +1359,41 @@ if ($cancelledCount > 0) {
             slot.classList.add('selected');
                 
                 // Set the selected time in the hidden input field
-            document.getElementById('appointment_time').value = slot.innerText;
+            document.getElementById('appointment_time').value = slot.getAttribute('data-time');
         }
-        function selectTimeSlot(element) {
-            // Remove "selected" class from all time slots
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
+
+
+        function refreshAppointmentsList() {
+    fetch('calendar.php?get_all_appointments=1')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('appointmentsTableBody');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '';
+            data.appointments.forEach(apt => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-appointment-id', apt.id);
+                row.innerHTML = `
+                    <td>${apt.date}</td>
+                    <td>${apt.time}</td>
+                    <td>${apt.pet_name}</td>
+                    <td>${apt.owner}</td>
+                    <td>${apt.service}</td>
+                    <td><span class="badge bg-${apt.status === 'Pending' ? 'warning' : 'success'}">${apt.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editAppointment(${apt.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAppointment(${apt.id})">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
             });
+        })
+        .catch(err => console.error('Error reloading appointments:', err));
 
-            // Add "selected" class to the clicked one
-            element.classList.add('selected');
+        autoCancelConflictingAppointments($conn);
+}
 
-            // Set the hidden input value
-            document.getElementById('appointment_time').value = element.textContent.trim();
-        }
-
-        
     </script>
 
     <!-- Bootstrap Bundle with Popper -->

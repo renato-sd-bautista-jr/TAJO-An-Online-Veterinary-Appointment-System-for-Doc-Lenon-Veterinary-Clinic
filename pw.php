@@ -1,4 +1,7 @@
+
+
 <?php
+include 'navbar.php';
 // Start session for any potential user authentication needs
 session_start();
 
@@ -410,31 +413,7 @@ if (isset($_GET['get_content']) && isset($_GET['id'])) {
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar" style="background-color: #e3f2fd;">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
-          DOC LENON VETERINARY
-        </a>
-        <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a class="nav-link" href="index.php">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="pw.php">Services Post</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link " href="products.php">Products</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link " aria-current="page" href="contact.php">Contact Us</a>
-          </li>
-            <button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button>
-          </li>
-        </ul>
-      </div>
-    </nav>
+ <link rel="stylesheet" href="navbar.css">
     <div class="container">
         <!-- Posts Section -->
          <div class="d-flex justify-content-between align-items-center mb-4">

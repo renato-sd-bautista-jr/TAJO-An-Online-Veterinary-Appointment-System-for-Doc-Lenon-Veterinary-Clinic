@@ -1,3 +1,4 @@
+<?php include 'navbar.php'; ?>
 <!doctype html>
 <html lang="en">
   <head>
@@ -79,32 +80,7 @@
     </style>
   </head>
   <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar" style="background-color: #e3f2fd;">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          <img src="img/LOGO.png" alt="Logo" width="45" height="40" class="d-inline-block align-text-top">
-          DOC LENON VETERINARY
-        </a>
-        <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a class="nav-link" href="index.php">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="pw.php">Services Post</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="products.php">Products</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="contact.php">Contact Us</a>
-          </li>
-            <button type="button" class="btn btn-primary" onclick="window.location.href='Appointment.php'">Book Appointment</button>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
+ <link rel="stylesheet" href="navbar.css">
     <!-- Contact Header -->
     <div class="contact-header">
       <div class="container text-center">

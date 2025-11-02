@@ -1,7 +1,8 @@
+
 <?php
 // Start session for admin authentication
 session_start();
-
+include 'navbar.php';
 // Database connection
 $servername = "localhost";
 $username = "root"; // Change to your database username
@@ -24,8 +25,14 @@ if (isset($_POST['add_appointment'])) {
     $pet_type = $_POST['pet_type'];
     $owner_name = $_POST['owner_name'];
     $owner_phone = $_POST['owner_phone'];
-    $service_type = $_POST['service_type'];
+        if (isset($_POST['service_type']) && is_array($_POST['service_type'])) {
+    $service_type = implode(", ", $_POST['service_type']);
+    } else {
+        $service_type = '';
+    }
+    $owner_email = $_POST['owner_email'];
     $notes = $_POST['notes'];
+
 
     // Basic validation
     if (!empty($appointment_date) && !empty($appointment_time) && !empty($owner_name)) {
@@ -130,14 +137,7 @@ $check->close();
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-light bg-light fixed-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="index.php">
-                <img src="img/LOGO.png" alt="Logo" width="40" height="35" class="me-2"> DOC LENON VETERINARY
-            </a>
-        </div>
-    </nav>
+    <link rel="stylesheet" href="navbar.css">
 
     <div class="container text-center">
         <h1 class="fw-bold mb-4">Book an Appointment</h1>
@@ -183,19 +183,34 @@ $check->close();
                                     <input type="hidden" id="appointment_time" name="appointment_time" required>
                                 </div>
 
-                                <!-- Service Type -->
                                 <div class="mb-3">
-                                    <label for="service_type" class="form-label">Service Type</label>
-                                    <select class="form-select" id="service_type" name="service_type" required>
-                                        <option value="">Select a service</option>
-                                        <option value="Checkup">Regular Checkup</option>
-                                        <option value="Vaccination">Vaccination</option>
-                                        <option value="Surgery">Surgery</option>
-                                        <option value="Dental">Dental Cleaning</option>
-                                        <option value="Grooming">Grooming</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
+  <label class="form-label">Service Type (Select one or more)</label><br>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Checkup" id="serviceCheckup">
+    <label class="form-check-label" for="serviceCheckup">Regular Checkup</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Vaccination" id="serviceVaccination">
+    <label class="form-check-label" for="serviceVaccination">Vaccination</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Surgery" id="serviceSurgery">
+    <label class="form-check-label" for="serviceSurgery">Surgery</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Dental" id="serviceDental">
+    <label class="form-check-label" for="serviceDental">Dental Cleaning</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Grooming" id="serviceGrooming">
+    <label class="form-check-label" for="serviceGrooming">Grooming</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="service_type[]" value="Other" id="serviceOther">
+    <label class="form-check-label" for="serviceOther">Other</label>
+  </div>
+</div>
+
                             </div>
 
                             <div class="col-md-6">

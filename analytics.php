@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+include 'sidebar.php';
 // Database connection
 $servername = "localhost";
 $username = "root";
@@ -106,35 +106,8 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
   </style>
 </head>
 <body>
- <!-- Sidebar Navigation -->
-   <div id="mySidebar" class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-paw"></i> Doc Lenon
-        </div>
-        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products" >
-            <i class="fas fa-box"></i> Products Inventory
-        </a>
-        <a href="post.php" >
-            <i class="fas fa-blog"></i> Post Management
-        </a>
-        <a href="calendar.php">
-            <i class="fas fa-calendar-alt"></i> Appointment Calendar
-        </a>
-        <a href="history1.php">
-            <i class="fas fa-history"></i> Appointment History
-        </a>
-        <a href="ordermanagement.php">
-            <i class="fas fa-box"></i> Order Management
-        </a>
-        <a href="analytics.php"class="active">
-            <i class="fas fa-chart-bar"></i> Analytics
-        </a>
-        <a href="logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
 
+<link rel="stylesheet" href="sidebar.css">
 <div id="main" class="main-content">
     <!-- Header -->
     <div class="admin-header">
@@ -325,14 +298,16 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }
 document.addEventListener("DOMContentLoaded", toggleDateFilters);
 
+
 function openNav() {
-  document.getElementById("mySidebar").style.width = "250px";
-  document.getElementById("main").style.marginLeft = "250px";
+    document.getElementById("mySidebar").style.width = "250px";
+    document.querySelector(".main-content").style.marginLeft = "250px";
 }
 function closeNav() {
-  document.getElementById("mySidebar").style.width = "0";
-  document.getElementById("main").style.marginLeft= "0";
+    document.getElementById("mySidebar").style.width = "0";
+    document.querySelector(".main-content").style.marginLeft = "0";
 }
+
 </script>
 </body>
 </html>

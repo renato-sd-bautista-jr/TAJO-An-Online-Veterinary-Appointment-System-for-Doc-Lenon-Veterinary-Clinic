@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+include 'navbar.php';
 $conn = new mysqli("localhost", "root", "", "taho");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
@@ -118,20 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'checkout') {
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
-  <div class="container">
-    <a class="navbar-brand" href="#"><img src="img/LOGO.png" width="40" class="me-2">DOC LENON VETERINARY</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="Index.php">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="pw.php">Services Post</a></li>
-        <li class="nav-item"><a class="nav-link active" href="#">Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="Contact Us.php">Contact Us</a></li>
-        <li class="nav-item"><button class="btn btn-primary ms-2" onclick="window.location.href='Appointment.php'">Book Appointment</button></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+ <link rel="stylesheet" href="navbar.css">
 
 <div class="container mt-4">
   <?php if ($flash): ?>

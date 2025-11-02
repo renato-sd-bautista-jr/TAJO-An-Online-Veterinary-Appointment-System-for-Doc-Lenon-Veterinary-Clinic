@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+include 'sidebar.php';
 // DB connecton
 $conn = new mysqli("localhost","root","","taho");
 if ($conn->connect_error) die("Connection failed: ".$conn->connect_error);
@@ -206,34 +208,9 @@ body {
 </style>
 </head>
 <body>
- <!-- Sidebar Navigation -->
-   <div id="mySidebar" class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-paw"></i> Doc Lenon
-        </div>
-        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products" >
-            <i class="fas fa-box"></i> Products Inventory
-        </a>
-        <a href="post.php" >
-            <i class="fas fa-blog"></i> Post Management
-        </a>
-        <a href="calendar.php">
-            <i class="fas fa-calendar-alt"></i> Appointment Calendar
-        </a>
-        <a href="history1.php">
-            <i class="fas fa-history"></i> Appointment History
-        </a>
-        <a href="ordermanagement.php"class="active">
-            <i class="fas fa-box"></i> Order Management
-        </a>
-        <a href="analytics.php">
-            <i class="fas fa-chart-bar"></i> Analytics
-        </a>
-        <a href="logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
+<link rel="stylesheet" href="sidebar.css">
+
+
 
 
 <div id="main" class="main-content">

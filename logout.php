@@ -10,8 +10,7 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
     // Destroy the session
     session_destroy();
     
-    // Redirect to login page
-    header("Location: admin.php");
+    
     exit();
 }
 ?>
@@ -75,7 +74,6 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
 </head>
 <body>
     <!-- Load the index page as background -->
-    <iframe src="admin.php" class="background-frame"></iframe>
     
     <!-- Overlay with logout confirmation -->
     <div class="overlay">

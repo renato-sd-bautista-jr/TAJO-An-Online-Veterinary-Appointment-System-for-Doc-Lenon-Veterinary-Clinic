@@ -1,7 +1,7 @@
 <?php
 // Start session for admin authentication
 session_start();
-
+include 'sidebar.php';
 // Database connection
 $servername = "localhost";
 $username = "root"; // Change to your database username
@@ -28,6 +28,19 @@ if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
     header("Location: admin.php");
+    exit;
+}
+
+if (isset($_POST['complete_appointment'])) {
+    $id = $_POST['complete_appointment'];
+    $query = "UPDATE appointments SET status = 'Completed' WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
+        echo "Appointment marked as completed.";
+    } else {
+        echo "Failed to update appointment.";
+    }
     exit;
 }
 
@@ -291,25 +304,36 @@ if (isset($_GET['success'])): ?>
 
 if (isset($_GET['get_all_appointments'])) {
     $appointmentsData = [];
+
     $sql = "SELECT id, appointment_date, appointment_time, pet_name, owner_name, service_type, status 
             FROM appointments 
             ORDER BY appointment_date, appointment_time";
+
     $result = $conn->query($sql);
-    while ($row = $result->fetch_assoc()) {
-        $appointmentsData[] = [
-            'id' => $row['id'],
-            'date' => $row['appointment_date'],
-            'time' => date('g:i A', strtotime($row['appointment_time'])),
-            'pet_name' => $row['pet_name'],
-            'owner' => $row['owner_name'],
-            'service' => $row['service_type'],
-            'status' => $row['status']
-        ];
+
+    // Check if the query succeeded
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $appointmentsData[] = [
+                'id' => $row['id'],
+                'date' => $row['appointment_date'],
+                'time' => date('g:i A', strtotime($row['appointment_time'])),
+                'pet_name' => $row['pet_name'],
+                'owner' => $row['owner_name'],
+                'service' => $row['service_type'],
+                'status' => $row['status']
+            ];
+        }
+    } else {
+        // Optional: for debugging, you can uncomment this temporarily
+        // echo json_encode(['error' => $conn->error]); exit;
     }
+
     header('Content-Type: application/json');
     echo json_encode(['appointments' => $appointmentsData]);
     exit;
 }
+
 
 
 
@@ -580,34 +604,7 @@ if (isset($_GET['get_all_appointments'])) {
 
     </style>
 </head>
- <!-- Sidebar Navigation -->
-   <div id="mySidebar" class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-paw"></i> Doc Lenon
-        </div>
-        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
-        <a href="admin.php?page=products" >
-            <i class="fas fa-box"></i> Products Inventory
-        </a>
-        <a href="post.php" >
-            <i class="fas fa-blog"></i> Post Management
-        </a>
-        <a href="calendar.php"class="active">
-            <i class="fas fa-calendar-alt"></i> Appointment Calendar
-        </a>
-        <a href="history1.php">
-            <i class="fas fa-history"></i> Appointment History
-        </a>
-        <a href="ordermanagement.php">
-            <i class="fas fa-box"></i> Order Management
-        </a>
-        <a href="analytics.php">
-            <i class="fas fa-chart-bar"></i> Analytics
-        </a>
-        <a href="logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
+<link rel="stylesheet" href="sidebar.css">
 
 
     <!-- Main Content -->
@@ -794,14 +791,25 @@ if (isset($_GET['get_all_appointments'])) {
                                                         <?php echo ($appointment['status'] == 'Confirmed' || $appointment['status'] == 'Cancelled' || $appointment['status'] == 'Completed') ? 'disabled' : ''; ?>>
                                                         <i class="fas fa-save"></i>
                                                     </button>
+
                                                     <button class="btn btn-sm btn-primary" title="Edit" onclick="editAppointment(<?php echo $appointment['id']; ?>)"
                                                         <?php echo ($appointment['status'] == 'Cancelled' || $appointment['status'] == 'Completed') ? 'disabled' : ''; ?>>
                                                         <i class="fas fa-edit"></i>
                                                     </button>
+
                                                     <button class="btn btn-sm btn-danger" title="Cancel" onclick="deleteAppointment(<?php echo $appointment['id']; ?>)"
                                                         <?php echo ($appointment['status'] == 'Completed') ? 'disabled' : ''; ?>>
                                                         <i class="fas fa-times"></i>
                                                     </button>
+
+                                                    <?php
+                                                        
+                                                        if ($appointment['status'] == 'Confirmed'):
+                                                        ?>
+                                                            <button class="btn btn-sm btn-success" title="Mark as Completed" onclick="completeAppointment(<?php echo $appointment['id']; ?>)">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -1046,6 +1054,57 @@ if (isset($_GET['get_all_appointments'])) {
                 });
             });
         }
+ function completeAppointment(id) {
+    if (!confirm("Mark this appointment as completed?")) return;
+
+    fetch('complete_appointment.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'id=' + encodeURIComponent(id)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Find the corresponding status badge and update it
+            const row = document.querySelector(`tr[data-appointment-id="${id}"]`);
+            if (row) {
+                const statusBadge = row.querySelector('.badge');
+                if (statusBadge) {
+                    statusBadge.textContent = 'Completed';
+                    statusBadge.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                    statusBadge.classList.add('bg-primary');
+                }
+
+                // Disable all buttons since appointment is completed
+                row.querySelectorAll('button').forEach(btn => btn.disabled = true);
+            }
+
+            // Show a success message without reload
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-primary alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                Appointment marked as completed!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.container').prepend(alertDiv);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => alertDiv.remove(), 3000);
+
+            reloadAppointmentsList(); // refresh the table if available
+        } else {
+            alert('Failed to mark appointment as completed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while marking the appointment as completed.');
+    });
+}
+
+
         
         // Convert time from 12-hour format to 24-hour format
         function convertTo24Hour(time12h) {
@@ -1277,15 +1336,7 @@ if (isset($_GET['get_all_appointments'])) {
             const modal = new bootstrap.Modal(document.getElementById('dayAppointmentsModal'));
             modal.show();
         }
-        function openNav() {
-            document.getElementById("mySidebar").style.width = "250px";
-            document.getElementById("main").style.marginLeft = "250px";
-        }
-        
-        function closeNav() {
-            document.getElementById("mySidebar").style.width = "0";
-            document.getElementById("main").style.marginLeft = "0";
-        }
+       
         function saveAppointment(id) {
             fetch('save_appointment.php', {
                 method: 'POST',
@@ -1392,6 +1443,13 @@ function reloadAppointmentsList() {
         .catch(err => console.error('Error reloading appointments:', err));
 
         autoCancelConflictingAppointments($conn);
+}function openNav() {
+    document.getElementById("mySidebar").style.width = "250px";
+    document.querySelector(".main-content").style.marginLeft = "250px";
+}
+function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+    document.querySelector(".main-content").style.marginLeft = "0";
 }
 
     </script>

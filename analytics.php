@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'sidebar.php';
+
 // Database connection
 $servername = "localhost";
 $username = "root";
@@ -17,51 +18,69 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// Filters
-$period = isset($_GET['period']) ? $_GET['period'] : 'daily'; 
-$view = isset($_GET['view']) ? $_GET['view'] : 'table'; // table | bar | pie
+// --- FILTERS ---
+$period = $_GET['period'] ?? 'daily';
+$view = $_GET['view'] ?? 'table';
+$dataType = $_GET['data_type'] ?? 'appointments'; // appointments | orders
 $where = "WHERE 1=1";
 
+// Date filtering logic
 if ($period === 'daily') {
     if (!empty($_GET['date_from']) && !empty($_GET['date_to'])) {
         $from = $conn->real_escape_string($_GET['date_from']);
         $to = $conn->real_escape_string($_GET['date_to']);
-        $where .= " AND DATE(appointment_date) BETWEEN '$from' AND '$to'";
+        $where .= " AND DATE(created_at) BETWEEN '$from' AND '$to'";
     }
-    $group = "DATE(appointment_date)";
+    $group = "DATE(created_at)";
 } elseif ($period === 'monthly') {
     if (!empty($_GET['month_from']) && !empty($_GET['month_to'])) {
         $from = $conn->real_escape_string($_GET['month_from']) . "-01";
-        $to = date("Y-m-t", strtotime($_GET['month_to'] . "-01")); // last day of that month
-        $where .= " AND appointment_date BETWEEN '$from' AND '$to'";
+        $to = date("Y-m-t", strtotime($_GET['month_to'] . "-01"));
+        $where .= " AND created_at BETWEEN '$from' AND '$to'";
     }
-    $group = "DATE_FORMAT(appointment_date, '%Y-%m')";
+    $group = "DATE_FORMAT(created_at, '%Y-%m')";
 } else { // yearly
     if (!empty($_GET['year_from']) && !empty($_GET['year_to'])) {
         $from = intval($_GET['year_from']) . "-01-01";
         $to = intval($_GET['year_to']) . "-12-31";
-        $where .= " AND appointment_date BETWEEN '$from' AND '$to'";
+        $where .= " AND created_at BETWEEN '$from' AND '$to'";
     }
-    $group = "YEAR(appointment_date)";
+    $group = "YEAR(created_at)";
 }
 
-$sql = "
-SELECT 
-    $group AS period,
-    COUNT(*) AS total,
-    SUM(status='Pending') AS pending,
-    SUM(status='Confirmed') AS confirmed,
-    SUM(status='Completed') AS completed,
-    SUM(status='Cancelled') AS cancelled
-FROM appointments
-$where
-GROUP BY period
-ORDER BY period ASC
-";
+// --- SELECT TABLE BASED ON DATA TYPE ---
+if ($dataType === 'appointments') {
+    $sql = "
+        SELECT 
+            $group AS period,
+            COUNT(*) AS total,
+            SUM(status='Pending') AS pending,
+            SUM(status='Confirmed') AS confirmed,
+            SUM(status='Completed') AS completed,
+            SUM(status='Cancelled') AS cancelled
+        FROM appointments
+        $where
+        GROUP BY period
+        ORDER BY period ASC
+    ";
+} else { // orders
+    $sql = "
+        SELECT 
+            $group AS period,
+            COUNT(*) AS total,
+            SUM(status='Pending') AS pending,
+            SUM(status='Accepted') AS accepted,
+            SUM(status='To Claim') AS toclaim,
+            SUM(status='Completed') AS completed
+        FROM orders
+        $where
+        GROUP BY period
+        ORDER BY period ASC
+    ";
+}
 
 $res = $conn->query($sql);
 $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -138,8 +157,8 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
       <option value="">-- From Month --</option>
       <?php
       $currentYear = date("Y"); 
-      $startYear = $currentYear - 2; // 2 years before
-      $endYear = $currentYear + 2;   // 2 years ahead
+      $startYear = $currentYear - 0; // 2 years before
+      $endYear = $currentYear + 1;   // 2 years ahead
 
       for ($y = $startYear; $y <= $endYear; $y++) {
           for ($m = 1; $m <= 12; $m++) {
@@ -174,9 +193,9 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 
 
         <!-- Yearly filter -->
-        <input type="number" min="2000" max="2100" name="year_from" id="yearlyFilterFrom" class="form-control w-auto d-none" 
+        <input type="number" min="2025" max="2026" name="year_from" id="yearlyFilterFrom" class="form-control w-auto d-none" 
                placeholder="Year From" value="<?php echo $_GET['year_from'] ?? ''; ?>">
-        <input type="number" min="2000" max="2100" name="year_to" id="yearlyFilterTo" class="form-control w-auto d-none" 
+        <input type="number" min="2025" max="2026" name="year_to" id="yearlyFilterTo" class="form-control w-auto d-none" 
                placeholder="Year To" value="<?php echo $_GET['year_to'] ?? ''; ?>">
 
         <select name="view" class="form-select w-auto">
@@ -184,6 +203,11 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
             <option value="bar" <?php echo $view==='bar'?'selected':''; ?>>Bar Chart</option>
             <option value="pie" <?php echo $view==='pie'?'selected':''; ?>>Pie Chart</option>
         </select>
+
+        <select name="data_type" class="form-select w-auto">
+  <option value="appointments" <?= $dataType === 'appointments' ? 'selected' : '' ?>>Appointments</option>
+  <option value="orders" <?= $dataType === 'orders' ? 'selected' : '' ?>>Orders</option>
+</select>
 
         <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply</button>
     </form>
@@ -212,7 +236,17 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
                         <tbody>
                             <?php foreach ($analytics as $row): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($row['period']); ?></td>
+                                <td>
+  <?php 
+    if ($period === 'daily') {
+        echo date("M j, Y", strtotime($row['period']));
+    } elseif ($period === 'monthly') {
+        echo date("F Y", strtotime($row['period'] . "-01"));
+    } elseif ($period === 'yearly') {
+        echo $row['period'];
+    }
+  ?>
+</td>
                                 <td><?php echo $row['total']; ?></td>
                                 <td class="text-warning fw-bold"><?php echo $row['pending']; ?></td>
                                 <td class="text-primary fw-bold"><?php echo $row['confirmed']; ?></td>
@@ -234,47 +268,37 @@ $analytics = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
             height="120"></canvas>
     </div>
     <script>
-                    const labels = <?php echo json_encode(array_column($analytics, 'period')); ?>;
-                    const total = <?php echo json_encode(array_column($analytics, 'total')); ?>;
-                    const pending = <?php echo json_encode(array_column($analytics, 'pending')); ?>;
-                    const confirmed = <?php echo json_encode(array_column($analytics, 'confirmed')); ?>;
-                    const completed = <?php echo json_encode(array_column($analytics, 'completed')); ?>;
-                    const cancelled = <?php echo json_encode(array_column($analytics, 'cancelled')); ?>;
+                   const labels = <?php echo json_encode(array_column($analytics, 'period')); ?>;
+const datasetLabels = <?php echo json_encode(array_keys($analytics[0] ?? [])); ?>;
+const ctx = document.getElementById('analyticsChart')?.getContext('2d');
 
-                    const ctx = document.getElementById('analyticsChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: '<?php echo $view === "bar" ? "bar" : "pie"; ?>',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                <?php if ($view === "bar"): ?>
-                                { label: 'Pending', data: pending, backgroundColor: '#ffc107' },
-                                { label: 'Confirmed', data: confirmed, backgroundColor: '#0d6efd' },
-                                { label: 'Completed', data: completed, backgroundColor: '#198754' },
-                                { label: 'Cancelled', data: cancelled, backgroundColor: '#dc3545' }
-                                <?php else: ?>
-                                {
-                                    label: 'Appointments',
-                                    data: total,
-                                    backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#20c997']
-                                }
-                                <?php endif; ?>
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: { legend: { position: 'top' } }
-                        }
-                    });
-                </script>
-            <?php endif; ?>
+<?php if ($view !== 'table'): ?>
+const dataSets = [];
 
-        </div>
-    </div>
-</div>
+<?php if ($dataType === 'appointments'): ?>
+dataSets.push({ label: 'Pending', data: <?php echo json_encode(array_column($analytics, 'pending')); ?>, backgroundColor: '#ffc107' });
+dataSets.push({ label: 'Confirmed', data: <?php echo json_encode(array_column($analytics, 'confirmed')); ?>, backgroundColor: '#0d6efd' });
+dataSets.push({ label: 'Completed', data: <?php echo json_encode(array_column($analytics, 'completed')); ?>, backgroundColor: '#198754' });
+dataSets.push({ label: 'Cancelled', data: <?php echo json_encode(array_column($analytics, 'cancelled')); ?>, backgroundColor: '#dc3545' });
+<?php else: ?>
+dataSets.push({ label: 'Pending', data: <?php echo json_encode(array_column($analytics, 'pending')); ?>, backgroundColor: '#ffc107' });
+dataSets.push({ label: 'Accepted', data: <?php echo json_encode(array_column($analytics, 'accepted')); ?>, backgroundColor: '#0d6efd' });
+dataSets.push({ label: 'To Claim', data: <?php echo json_encode(array_column($analytics, 'toclaim')); ?>, backgroundColor: '#20c997' });
+dataSets.push({ label: 'Completed', data: <?php echo json_encode(array_column($analytics, 'completed')); ?>, backgroundColor: '#198754' });
+<?php endif; ?>
 
-<!-- Sidebar Toggle JS -->
-<script>
+new Chart(ctx, {
+    type: '<?php echo $view === "bar" ? "bar" : "pie"; ?>',
+    data: {
+        labels: labels,
+        datasets: dataSets
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+});
+<?php endif; ?>
+
+
+
 
   function toggleDateFilters() {
     const period = document.getElementById("periodSelect").value;
@@ -308,6 +332,23 @@ function closeNav() {
     document.querySelector(".main-content").style.marginLeft = "0";
 }
 
-</script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", () => {
+  const dateFrom = document.getElementById("dailyFilterFrom");
+  const dateTo = document.getElementById("dailyFilterTo");
+
+  if (dateFrom && dateTo) {
+    dateFrom.addEventListener("change", () => {
+      dateTo.min = dateFrom.value;
+    });
+    dateTo.addEventListener("change", () => {
+      if (dateTo.value < dateFrom.value) {
+        dateTo.value = dateFrom.value;
+      }
+    });
+  }
+});
+
+                </script>
+             
+            <?php endif; ?>
+        </div>
